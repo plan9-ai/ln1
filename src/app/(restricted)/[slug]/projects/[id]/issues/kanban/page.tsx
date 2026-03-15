@@ -67,7 +67,7 @@ export default async function IssuesKanbanPage({
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href={`/${slug}/projects/${id}`}>
+                <BreadcrumbLink href={`/${slug}/projects/${id}/issues`}>
                   {project.title}
                 </BreadcrumbLink>
               </BreadcrumbItem>
