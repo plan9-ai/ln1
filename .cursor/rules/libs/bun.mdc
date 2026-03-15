@@ -1,0 +1,26 @@
+---
+description: This rule describes the nuances of using the Bun runtime.
+alwaysApply: false
+---
+
+## General 
+
+## Framework nuances
+https://bun.com/docs/runtime/sql
+
+
+## Examples
+
+**Insert**
+```ts
+// Using object helper for cleaner syntax
+const userData = {
+  name: "Alice",
+  email: "alice@example.com",
+};
+
+const [newUser] = await sql`
+  INSERT INTO users ${sql(userData)}
+  RETURNING *
+`;
+```

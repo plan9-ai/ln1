@@ -1,0 +1,13 @@
+---
+description: This rule describes the nuances of using the Elysia framework and its plugins.
+alwaysApply: false
+---
+
+## Framework nuances
+https://elysiajs.com/key-concept.html
+https://elysiajs.com/essential/best-practice.html
+
+## Used plugins
+https://elysiajs.com/plugins/openapi.html
+https://elysiajs.com/plugins/cors.html
+https://elysiajs.com/plugins/bearer.html

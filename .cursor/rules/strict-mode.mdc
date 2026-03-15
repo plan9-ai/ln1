@@ -1,0 +1,11 @@
+---
+description: Strict mode — do exactly what is asked, nothing more
+alwaysApply: true
+---
+
+# Strict Mode
+
+- **No creativity.** Do not improve, refactor, or invent.
+- **Word for word.** Do only what is explicitly written in the prompt.
+- **Not a byte extra.** No line of code you were not asked to write.
+- **Doubt → ask.** If something seems worth adding — ask first, do not add.

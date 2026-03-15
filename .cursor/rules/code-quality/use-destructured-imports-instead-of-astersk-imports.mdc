@@ -1,0 +1,33 @@
+---
+alwaysApply: true
+---
+
+Never use `import * from` — always use destructured imports instead.
+
+## Bad Examples ❌
+
+- Importing everything from React:
+
+```ts
+import * as React from 'react';
+```
+
+- Importing all utilities:
+
+```ts
+import * as utils from './utils';
+```
+
+## Good Examples ✅
+
+- Import only what you need from React:
+
+```ts
+import { useState, useEffect } from 'react';
+```
+
+- Import specific utilities:
+
+```ts
+import { formatDate, validateEmail } from './utils';
+```

@@ -1,0 +1,29 @@
+#!/bin/sh
+set -e
+
+if [ -z "$(git diff --cached --name-only)" ]; then
+  echo "No staged files to format"
+  exit 0
+fi
+
+STAGED_HASH=$(git diff --cached | sha256sum | cut -d' ' -f1)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR)
+
+bun x ultracite fix
+FORMAT_EXIT_CODE=$?
+
+# Re-add formatted files to include formatting in commit
+if [ -n "$STAGED_FILES" ]; then
+  echo "$STAGED_FILES" | while IFS= read -r file; do
+    if [ -f "$file" ]; then
+      git add "$file"
+    fi
+  done
+fi
+
+NEW_STAGED_HASH=$(git diff --cached | sha256sum | cut -d' ' -f1)
+if [ "$STAGED_HASH" != "$NEW_STAGED_HASH" ]; then
+  echo "✨ Files formatted by Ultracite"
+fi
+
+exit $FORMAT_EXIT_CODE

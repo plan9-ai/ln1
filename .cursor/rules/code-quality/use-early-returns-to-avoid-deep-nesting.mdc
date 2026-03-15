@@ -1,0 +1,133 @@
+---
+alwaysApply: true
+---
+
+Use early returns to avoid deep nesting and improve code readability. Exit functions as soon as you can determine the result, rather than wrapping logic in multiple conditional blocks.
+
+## Bad Examples ❌
+
+- Deep nesting from multiple conditions:
+
+```ts
+async function createPost(data: CreatePostBody, userId: string) {
+  if (data.title) {
+    if (data.content) {
+      if (data.tags && data.tags.length > 0) {
+        if (await validateContent(data.content)) {
+          const post = await db.insert(posts).values({
+            title: data.title,
+            content: data.content,
+            tags: data.tags,
+            userId,
+          });
+          return post;
+        } else {
+          throw new Error("Invalid content");
+        }
+      } else {
+        throw new Error("At least one tag required");
+      }
+    } else {
+      throw new Error("Content is required");
+    }
+  } else {
+    throw new Error("Title is required");
+  }
+}
+```
+
+- Multiple if-else chains:
+
+```ts
+function processUser(user: User) {
+  if (user.isActive) {
+    if (user.hasPermission) {
+      if (user.emailVerified) {
+        return sendWelcomeEmail(user);
+      } else {
+        return sendVerificationEmail(user);
+      }
+    } else {
+      return grantDefaultPermissions(user);
+    }
+  } else {
+    return disableUser(user);
+  }
+}
+```
+
+## Good Examples ✅
+
+- Early returns with guard clauses:
+
+```ts
+async function createPost(data: CreatePostBody, userId: string) {
+  if (!data.title) {
+    throw new Error("Title is required");
+  }
+  
+  if (!data.content) {
+    throw new Error("Content is required");
+  }
+  
+  if (!data.tags || data.tags.length === 0) {
+    throw new Error("At least one tag required");
+  }
+  
+  const isValid = await validateContent(data.content);
+  if (!isValid) {
+    throw new Error("Invalid content");
+  }
+  
+  return await db.insert(posts).values({
+    title: data.title,
+    content: data.content,
+    tags: data.tags,
+    userId,
+  });
+}
+```
+
+- Early returns with clear control flow:
+
+```ts
+function processUser(user: User) {
+  if (!user.isActive) {
+    return disableUser(user);
+  }
+  
+  if (!user.emailVerified) {
+    return sendVerificationEmail(user);
+  }
+  
+  if (!user.hasPermission) {
+    return grantDefaultPermissions(user);
+  }
+  
+  return sendWelcomeEmail(user);
+}
+```
+
+- Early returns with optional values:
+
+```ts
+function getPostAuthor(post: Post): Author | null {
+  if (!post) {
+    return null;
+  }
+  
+  if (!post.authorId) {
+    return null;
+  }
+  
+  return authorCache.get(post.authorId) ?? null;
+}
+```
+
+## Why?
+
+- **Readability**: Flattens code structure, making it easier to follow logic from top to bottom
+- **Maintainability**: Reduces cognitive load when understanding control flow
+- **Error Handling**: Makes validation and error cases explicit upfront
+- **Performance**: Early exits prevent unnecessary computation
+- **Testing**: Simpler code paths are easier to test comprehensively

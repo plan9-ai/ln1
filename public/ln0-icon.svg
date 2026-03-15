@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="greenGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#33ff33" />
+      <stop offset="100%" stop-color="#00aa00" />
+    </linearGradient>
+  </defs>
+  <!-- Black terminal background -->
+  <rect width="512" height="512" rx="56" fill="#0a0a0a" />
+  <!-- Terminal bezel -->
+  <rect x="24" y="24" width="464" height="464" rx="48" fill="#000000" stroke="#1a1a1a" stroke-width="2" />
+  <!-- Content area - darker black -->
+  <rect x="48" y="48" width="416" height="416" rx="36" fill="#0d0d0d" />
+  <!-- $Ln0 centered -->
+  <text x="256" y="318" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', 'Fira Code', Monaco, Consolas, monospace" font-size="168" font-weight="600" fill="url(#greenGlow)">ln0</text>
+</svg>

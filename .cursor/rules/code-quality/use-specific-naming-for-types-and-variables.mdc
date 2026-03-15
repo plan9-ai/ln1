@@ -1,0 +1,50 @@
+---
+alwaysApply: true
+---
+
+Always use specific, descriptive names for types, classes, and variables. Avoid generic names that create ambiguity.
+
+## Bad Examples ❌
+
+- Generic type names without context:
+
+```ts
+type CreateBody = { ... };
+type UpdateBody = { ... };
+type NotFound = string;
+type ValidationError = { message: string };
+```
+
+- Generic variable names:
+
+```ts
+const body = { ... };
+const response = { ... };
+const error = "Not found";
+```
+
+## Good Examples ✅
+
+- Specific type names with domain context:
+
+```ts
+type CreatePostBody = { ... };
+type UpdatePostBody = { ... };
+type PostNotFound = string;
+type PostValidationError = { message: string };
+```
+
+- Descriptive variable names:
+
+```ts
+const createPostBody = { ... };
+const postResponse = { ... };
+const postNotFoundError = "Not found";
+```
+
+## Why?
+
+- **Clarity**: Specific names immediately convey purpose and context
+- **Maintainability**: Easier to search and understand code across the codebase
+- **Scalability**: Prevents naming conflicts in larger codebases with multiple domains
+- **Type Safety**: Reduces confusion when working with multiple similar types from different modules

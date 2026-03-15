@@ -1,0 +1,16 @@
+---
+description: This rule describes the nuances of using the Drizzle ORM and Drizzle Kit and its plugins.
+alwaysApply: false
+---
+
+## General 
+- Always use { onDelete: "cascade" }
+
+## Framework nuances
+https://orm.drizzle.team/docs/get-started-postgresql
+https://orm.drizzle.team/docs/sql-schema-declaration
+https://orm.drizzle.team/docs/indexes-constraints
+https://orm.drizzle.team/docs/connect-bun-sql
+https://orm.drizzle.team/docs/typebox
+
+## Used plugins

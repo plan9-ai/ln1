@@ -1,0 +1,3 @@
+- Commit the changes.
+- Cherry-pick the commit to the `scaffold` branch.
+- Push both branches.

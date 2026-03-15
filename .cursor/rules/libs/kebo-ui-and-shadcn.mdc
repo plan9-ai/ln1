@@ -1,0 +1,9 @@
+---
+description: This rule describes the nuances of using the Shadcn and Kebo-ui framework and its plugins.
+alwaysApply: false
+---
+
+## Framework nuances
+https://github.com/clauderic/dnd-kit - this lib is used for drag-n-drop functionality on kanban board
+https://tanstack.com/table/latest - used for tables
+

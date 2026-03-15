@@ -1,0 +1,88 @@
+---
+alwaysApply: true
+---
+# Always use interfaces where possible, use types only if necessary
+
+Prioritize using `interface` for defining object shapes. Use `type` aliases only when `interface` cannot fulfill the requirement, such as for union types, intersection types, primitive aliases, or complex mapped types.
+
+## Good Examples ✅
+
+- Using `interface` for object shapes:
+
+```typescript
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+interface Post {
+  id: string;
+  title: string;
+  content: string;
+  author: User;
+}
+```
+
+- Extending interfaces:
+
+```typescript
+interface BaseButtonProps {
+  onClick: () => void;
+  children: React.ReactNode;
+}
+
+interface PrimaryButtonProps extends BaseButtonProps {
+  variant: 'primary';
+}
+```
+
+## When to use `type` ⚠️
+
+- **Union or Intersection Types**: When combining types with `|` or `&`.
+
+```typescript
+type ID = string | number;
+
+type UserProfile = User & {
+  lastLogin: Date;
+};
+```
+
+- **Primitive Aliases**: Giving a new name to a primitive type.
+
+```typescript
+type EmailString = string;
+type Milliseconds = number;
+```
+
+- **Tuple Types**: Defining an array with a fixed number of elements of different types.
+
+```typescript
+type UserResponse = [string, number, boolean]; // [name, age, isActive]
+```
+
+- **Mapped Types or Conditional Types**: For advanced type manipulations.
+
+```typescript
+type ReadOnly<T> = {
+  readonly [P in keyof T]: T[P];
+};
+
+type NullableKeys<T> = {
+  [P in keyof T]: T[P] | null;
+};
+```
+
+- **Function Type Aliases**:
+
+```typescript
+type Greeter = (name: string) => string;
+```
+
+## Why?
+
+- **Declaration Merging**: `interface` supports declaration merging, allowing you to extend existing interfaces, which is beneficial for library authors and plugin development. `type` aliases do not.
+- **Error Messages**: Often produces more readable error messages compared to `type` aliases in complex scenarios.
+- **Consistency**: Promotes a consistent style for defining object structures.
+- **Performance**: In some scenarios, interfaces can be slightly more performant as they are simpler for the TypeScript compiler to process, though this difference is often negligible.

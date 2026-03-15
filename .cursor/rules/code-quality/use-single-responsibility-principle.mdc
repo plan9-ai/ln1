@@ -1,0 +1,77 @@
+---
+alwaysApply: true
+---
+
+Always adhere to the Single Responsibility Principle (SRP). Each module, class, or function should have one, and only one, reason to change. This improves maintainability, readability, and testability.
+
+## Bad Examples ❌
+
+- A single class handling user authentication, profile management, and notification sending:
+
+```typescript
+class UserService {
+  authenticateUser(username: string, password: string) { /* ... */ }
+  updateProfile(userId: string, profileData: any) { /* ... */ }
+  sendNotification(userId: string, message: string) { /* ... */ }
+}
+```
+This `UserService` has multiple reasons to change:
+- Authentication logic changes
+- Profile data structure changes
+- Notification delivery mechanism changes
+
+- A function that fetches data, processes it, and then displays it:
+
+```typescript
+function processAndDisplayData(url: string) {
+  const data = fetchData(url);
+  const processedData = processData(data);
+  displayData(processedData);
+}
+```
+This function has multiple responsibilities:
+- Fetching data
+- Processing data
+- Displaying data
+
+## Good Examples ✅
+
+- Separating concerns into distinct classes:
+
+```typescript
+class AuthService {
+  authenticateUser(username: string, password: string) { /* ... */ }
+}
+
+class UserProfileService {
+  updateProfile(userId: string, profileData: any) { /* ... */ }
+}
+
+class NotificationService {
+  sendNotification(userId: string, message: string) { /* ... */ }
+}
+```
+Each class now has a single responsibility, reducing the impact of changes.
+
+- Separating concerns into distinct functions:
+
+```typescript
+function fetchData(url: string) { /* ... */ }
+function processData(data: any) { /* ... */ }
+function displayData(data: any) { /* ... */ }
+
+function orchestrateDataDisplay(url: string) {
+  const data = fetchData(url);
+  const processedData = processData(data);
+  displayData(processedData);
+}
+```
+Each function has a single responsibility, making them more reusable and easier to test.
+
+## Why?
+
+- **Maintainability**: Changes in one area are less likely to affect others.
+- **Readability**: Code is easier to understand when each unit has a clear purpose.
+- **Testability**: Units can be tested in isolation, simplifying testing efforts.
+- **Flexibility**: Easier to refactor or replace components without side effects.
+- **Collaboration**: Multiple developers can work on different parts of the system with fewer conflicts.

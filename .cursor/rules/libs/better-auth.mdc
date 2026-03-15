@@ -1,0 +1,12 @@
+---
+description: This rule describes the nuances of the Better Auth library and its plugins
+alwaysApply: false
+---
+
+## Framework nuances
+https://better-auth.com/docs/concepts/api
+https://better-auth.com/docs/concepts/session-management
+https://better-auth.com/docs/concepts/database
+
+## Used plugins
+https://better-auth.com/docs/plugins/admin

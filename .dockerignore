@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+data
+.env*
+*.db
+.DS_Store
+.husky
+__tests__
+repomix-output.xml
+tasks
+.cursor
+.vscode
