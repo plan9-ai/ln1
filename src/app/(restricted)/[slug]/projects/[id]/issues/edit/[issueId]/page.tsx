@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth";
 import { IssuesService } from "@/modules/issues/service";
 import { ProjectStatusesService } from "@/modules/project-statuses/service";
 import { ProjectsService } from "@/modules/projects/service";
@@ -21,9 +21,7 @@ export default async function EditIssuePage({
 }: {
   params: Promise<{ slug: string; id: string; issueId: string }>;
 }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+const session = await getAuthSession();
   if (!session) {
     return null;
   }

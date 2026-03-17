@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth";
 import { ProjectsService } from "@/modules/projects/service";
 
 export default async function ProjectPage({
@@ -20,9 +20,7 @@ export default async function ProjectPage({
 }: {
   params: Promise<{ slug: string; id: string }>;
 }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getAuthSession();
   if (!session) {
     return null;
   }

@@ -20,10 +20,6 @@
         "--api-key",
         "ctx7sk-20d46eed-2b7f-4e5e-89bd-43dd988999bc"
       ]
-    },
-    "kibo-ui": {
-      "command": "bunx",
-      "args": ["-y", "mcp-remote", "https://www.kibo-ui.com/api/mcp/mcp"]
     }
   }
 }

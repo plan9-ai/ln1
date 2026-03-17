@@ -1,12 +1,9 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth";
 import { TeamsService } from "@/modules/teams/service";
 
 export default async function AppLayout(_: { children: React.ReactNode }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getAuthSession();
   if (!session) {
     return null;
   }

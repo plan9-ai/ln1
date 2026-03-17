@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth";
 import { CommentsService } from "@/modules/comments/service";
 import { IssuesService } from "@/modules/issues/service";
 import { ProjectsService } from "@/modules/projects/service";
@@ -25,9 +25,7 @@ export default async function ViewIssuePage({
 }: {
   params: Promise<{ slug: string; id: string; issueId: string }>;
 }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+const session = await getAuthSession();
   if (!session) {
     return null;
   }

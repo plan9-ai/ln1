@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth";
 import { TeamsService } from "@/modules/teams/service";
 
 export default async function MembersPage({
@@ -20,9 +20,7 @@ export default async function MembersPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+const session = await getAuthSession();
   if (!session) {
     redirect("/login");
   }

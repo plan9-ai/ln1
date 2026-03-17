@@ -2,8 +2,18 @@ import { AdminHeader } from "@/components/admin-header";
 import { AdminSidebar } from "@/components/admin-sidebar";
 import { AdminUsersTable } from "@/components/admin-users-table";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { getAuthSession } from "@/lib/auth";
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const session = await getAuthSession();
+  const user = session
+    ? {
+        name: session.user.name ?? "Admin",
+        email: session.user.email ?? "",
+        avatar: session.user.image ?? "",
+      }
+    : { name: "Admin", email: "", avatar: "" };
+
   return (
     <SidebarProvider
       style={
@@ -13,7 +23,7 @@ export default function AdminPage() {
         } as React.CSSProperties
       }
     >
-      <AdminSidebar variant="inset" />
+      <AdminSidebar user={user} variant="inset" />
       <SidebarInset>
         <AdminHeader />
         <div className="flex flex-1 flex-col">

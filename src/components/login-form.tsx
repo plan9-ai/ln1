@@ -13,7 +13,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
+import { signIn } from "@/lib/auth-actions";
 import { cn } from "@/lib/utils";
 
 export function LoginForm({
@@ -28,19 +28,13 @@ export function LoginForm({
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await authClient.signIn.email({
-      email,
-      password,
-      callbackURL: "/app",
-    });
+    const result = await signIn(email, password);
 
-    if (error) {
-      toast.error(error.message ?? "Failed to sign in");
+    if (result?.error) {
+      toast.error(result.error.message ?? "Failed to sign in");
       setLoading(false);
       return;
     }
-
-    window.location.href = "/app";
   };
 
   return (

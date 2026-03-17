@@ -1,8 +1,7 @@
 "use server";
 
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth";
 import { TeamsService } from "@/modules/teams/service";
 
 export async function addTeamMember(
@@ -10,9 +9,7 @@ export async function addTeamMember(
   email: string,
   role: "admin" | "member" | "viewer"
 ): Promise<void> {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getAuthSession();
   if (!session) {
     throw new Error("Unauthorized");
   }
@@ -25,9 +22,7 @@ export async function removeTeamMember(
   slug: string,
   targetUserId: string
 ): Promise<void> {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getAuthSession();
   if (!session) {
     throw new Error("Unauthorized");
   }

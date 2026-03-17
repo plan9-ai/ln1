@@ -14,7 +14,6 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { useSession } from "@/lib/auth-client";
 import type { TeamWithRole } from "@/modules/teams/model";
 
 function getNavMain(currentSlug: string) {
@@ -53,21 +52,20 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   teams: TeamWithRole[];
   currentSlug: string;
   projects: ProjectListItem[];
+  user: {
+    name: string;
+    email: string;
+    avatar: string;
+  };
 }
 
 export function AppSidebar({
   teams,
   currentSlug,
   projects,
+  user,
   ...props
 }: AppSidebarProps) {
-  const { data: session } = useSession();
-
-  const user = {
-    name: session?.user?.name ?? "User",
-    email: session?.user?.email ?? "",
-    avatar: session?.user?.image ?? "",
-  };
 
   const linksItems = [
     { title: "Dashboard", url: `/${currentSlug}`, icon: LayoutDashboard },

@@ -1,5 +1,5 @@
-import { sql } from "bun";
 import type { ProjectsInsert } from "@/db/schema/projects";
+import { sql } from "bun";
 import { TeamsService } from "@/modules/teams/service";
 
 export const ProjectsService = {

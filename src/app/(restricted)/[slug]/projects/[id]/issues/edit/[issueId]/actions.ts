@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth";
 import type { UpdateIssueBody } from "@/modules/issues/model";
 import { IssuesService } from "@/modules/issues/service";
 
@@ -12,9 +12,7 @@ export async function updateIssue(
   issueId: string,
   data: UpdateIssueBody
 ): Promise<void> {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+const session = await getAuthSession();
   if (!session) {
     redirect("/login");
   }

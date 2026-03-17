@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
+import { signIn } from "@/lib/auth-actions";
 
 export function AdminAuthGate({
   reason,
@@ -21,13 +21,10 @@ export function AdminAuthGate({
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await authClient.signIn.email({
-      email,
-      password,
-    });
+    const result = await signIn(email, password);
 
-    if (error) {
-      toast.error(error.message ?? "Failed to sign in");
+    if (result?.error) {
+      toast.error(result.error.message ?? "Failed to sign in");
       setLoading(false);
       return;
     }

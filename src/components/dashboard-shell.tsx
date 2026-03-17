@@ -9,6 +9,7 @@ interface DashboardShellProps {
   teams: TeamWithRole[];
   currentSlug: string;
   projects: ProjectListItem[];
+  user: { name: string; email: string; avatar: string };
   children: React.ReactNode;
 }
 
@@ -16,11 +17,17 @@ export function DashboardShell({
   teams,
   currentSlug,
   projects,
+  user,
   children,
 }: DashboardShellProps) {
   return (
     <SidebarProvider>
-      <AppSidebar currentSlug={currentSlug} projects={projects} teams={teams} />
+      <AppSidebar
+        currentSlug={currentSlug}
+        projects={projects}
+        teams={teams}
+        user={user}
+      />
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
   );

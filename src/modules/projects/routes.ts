@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
-import { auth } from "@/lib/auth";
 import { authEnsureSession } from "@/lib/ensure-user-in-app-db";
+import { getSessionForRequest } from "@/lib/auth";
 import { CommentsService } from "@/modules/comments/service";
 import { IssuesService } from "@/modules/issues/service";
 import { ProjectStatusesService } from "@/modules/project-statuses/service";
@@ -16,9 +16,8 @@ export const projectsRoutes = new Elysia({ prefix: "/projects" })
   .get(
     "/:id/statuses",
     async ({ params: { id }, request }) => {
-      const session = await authEnsureSession(
-        request.headers,
-        auth.api.getSession
+      const session = await authEnsureSession(() =>
+        getSessionForRequest(request)
       );
       const statuses = await ProjectStatusesService.getStatusesByProjectId(
         session.user.id,
@@ -33,9 +32,8 @@ export const projectsRoutes = new Elysia({ prefix: "/projects" })
   .patch(
     "/:id/issues",
     async ({ params: { id }, body, request }) => {
-      const session = await authEnsureSession(
-        request.headers,
-        auth.api.getSession
+      const session = await authEnsureSession(() =>
+        getSessionForRequest(request)
       );
       await IssuesService.updateIssuesPrioritiesInStatus(
         session.user.id,
@@ -53,9 +51,8 @@ export const projectsRoutes = new Elysia({ prefix: "/projects" })
   .patch(
     "/:id/issues/:issueId/move",
     async ({ params: { id, issueId }, body, request }) => {
-      const session = await authEnsureSession(
-        request.headers,
-        auth.api.getSession
+      const session = await authEnsureSession(() =>
+        getSessionForRequest(request)
       );
       await IssuesService.moveIssueToStatus(
         session.user.id,
@@ -74,9 +71,8 @@ export const projectsRoutes = new Elysia({ prefix: "/projects" })
   .get(
     "/:id/issues",
     async ({ params: { id }, request }) => {
-      const session = await authEnsureSession(
-        request.headers,
-        auth.api.getSession
+      const session = await authEnsureSession(() =>
+        getSessionForRequest(request)
       );
       const issues = await IssuesService.getIssuesByProjectId(
         session.user.id,
@@ -91,9 +87,8 @@ export const projectsRoutes = new Elysia({ prefix: "/projects" })
   .get(
     "/:id/issues/:issueId/comments",
     async ({ params: { issueId }, request }) => {
-      const session = await authEnsureSession(
-        request.headers,
-        auth.api.getSession
+      const session = await authEnsureSession(() =>
+        getSessionForRequest(request)
       );
       const comments = await CommentsService.getCommentsByIssueId(
         session.user.id,

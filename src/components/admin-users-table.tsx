@@ -59,7 +59,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { authClient } from "@/lib/auth-client";
 
 interface User {
   id: string;
@@ -202,34 +201,41 @@ const columns: ColumnDef<User>[] = [
 
 function UserActions({ user }: { user: User }) {
   const handleSetRole = async (role: "admin" | "user") => {
-    const { error } = await authClient.admin.setRole({
-      userId: user.id,
-      role,
+    const res = await fetch(`/api/admin/users/${user.id}/role`, {
+      credentials: "include",
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role }),
     });
-    if (error) {
-      toast.error(error.message ?? "Failed to update role");
+    if (!res.ok) {
+      const data = (await res.json()) as { error?: string };
+      toast.error(data.error ?? "Failed to update role");
     } else {
       toast.success(`Role updated to ${role}`);
     }
   };
 
   const handleBan = async () => {
-    const { error } = await authClient.admin.banUser({
-      userId: user.id,
+    const res = await fetch(`/api/admin/users/${user.id}/ban`, {
+      credentials: "include",
+      method: "POST",
     });
-    if (error) {
-      toast.error(error.message ?? "Failed to ban user");
+    if (!res.ok) {
+      const data = (await res.json()) as { error?: string };
+      toast.error(data.error ?? "Failed to ban user");
     } else {
       toast.success("User banned");
     }
   };
 
   const handleUnban = async () => {
-    const { error } = await authClient.admin.unbanUser({
-      userId: user.id,
+    const res = await fetch(`/api/admin/users/${user.id}/unban`, {
+      credentials: "include",
+      method: "POST",
     });
-    if (error) {
-      toast.error(error.message ?? "Failed to unban user");
+    if (!res.ok) {
+      const data = (await res.json()) as { error?: string };
+      toast.error(data.error ?? "Failed to unban user");
     } else {
       toast.success("User unbanned");
     }
@@ -315,22 +321,13 @@ function TableBodyContent({
 }
 
 async function fetchUsers(): Promise<{ users: User[]; total: number }> {
-  const { data, error } = await authClient.admin.listUsers({
-    query: {
-      limit: 100,
-      sortBy: "createdAt",
-      sortDirection: "desc",
-    },
-  });
-
-  if (error) {
-    throw new Error(error.message ?? "Failed to fetch users");
+  const res = await fetch("/api/admin/users", { credentials: "include" });
+  if (!res.ok) {
+    const data = (await res.json()) as { error?: string };
+    throw new Error(data.error ?? "Failed to fetch users");
   }
-
-  return {
-    users: (data?.users as User[]) ?? [],
-    total: data?.total ?? 0,
-  };
+  const data = (await res.json()) as { users: User[]; total: number };
+  return { users: data.users ?? [], total: data.total ?? 0 };
 }
 
 export function AdminUsersTable() {

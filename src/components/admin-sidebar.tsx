@@ -22,7 +22,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useSession } from "@/lib/auth-client";
 
 const navMain = [
   {
@@ -50,16 +49,15 @@ const navSecondary = [
   },
 ];
 
-export function AdminSidebar({
-  ...props
-}: React.ComponentProps<typeof Sidebar>) {
-  const { data: session } = useSession();
-
-  const user = {
-    name: session?.user?.name ?? "Admin",
-    email: session?.user?.email ?? "",
-    avatar: session?.user?.image ?? "",
+interface AdminSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  user: {
+    name: string;
+    email: string;
+    avatar: string;
   };
+}
+
+export function AdminSidebar({ user, ...props }: AdminSidebarProps) {
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>

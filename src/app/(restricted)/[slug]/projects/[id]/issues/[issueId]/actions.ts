@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { InsertCommentBody } from "@/db/schema/issue-comments";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth";
 import { CommentsService } from "@/modules/comments/service";
 
 export async function insertComment(
@@ -13,9 +13,7 @@ export async function insertComment(
   issueId: string,
   data: InsertCommentBody
 ): Promise<void> {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+const session = await getAuthSession();
   if (!session) {
     redirect("/login");
   }

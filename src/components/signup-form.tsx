@@ -13,7 +13,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
+import { signUp } from "@/lib/auth-actions";
 import { cn } from "@/lib/utils";
 
 export function SignupForm({
@@ -35,20 +35,13 @@ export function SignupForm({
 
     setLoading(true);
 
-    const { error } = await authClient.signUp.email({
-      email,
-      password,
-      name: email.split("@")[0],
-      callbackURL: "/app",
-    });
+    const result = await signUp(email, password, email.split("@")[0]);
 
-    if (error) {
-      toast.error(error.message ?? "Failed to create account");
+    if (result?.error) {
+      toast.error(result.error.message ?? "Failed to create account");
       setLoading(false);
       return;
     }
-
-    window.location.href = "/app";
   };
 
   return (

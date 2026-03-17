@@ -1,8 +1,8 @@
-import { sql } from "bun";
 import type {
   InsertCommentBody,
   IssueCommentsSelect,
 } from "@/db/schema/issue-comments";
+import { sql } from "bun";
 import { IssuesService } from "@/modules/issues/service";
 
 export const CommentsService = {

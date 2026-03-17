@@ -1,7 +1,6 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth";
 import { ProjectsService } from "@/modules/projects/service";
 import { TeamsService } from "@/modules/teams/service";
 
@@ -12,9 +11,7 @@ export default async function TeamSlugLayout({
   children: React.ReactNode;
   params: Promise<{ slug: string }>;
 }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getAuthSession();
   if (!session) {
     return null;
   }
@@ -36,8 +33,19 @@ export default async function TeamSlugLayout({
     slug
   );
 
+  const user = {
+    name: session.user.name ?? "User",
+    email: session.user.email ?? "",
+    avatar: session.user.image ?? "",
+  };
+
   return (
-    <DashboardShell currentSlug={slug} projects={projects} teams={teams}>
+    <DashboardShell
+      currentSlug={slug}
+      projects={projects}
+      teams={teams}
+      user={user}
+    >
       {children}
     </DashboardShell>
   );

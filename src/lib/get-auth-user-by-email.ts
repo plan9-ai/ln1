@@ -1,35 +1,25 @@
-import { Pool } from "pg";
-import { appConfig } from "@/app.config";
-
-let authPool: Pool | null = null;
-
-function getAuthPool(): Pool {
-  if (!authPool) {
-    authPool = new Pool({
-      connectionString: appConfig.BETTER_AUTH_DATABASE_URL,
-      max: 10,
-      idleTimeoutMillis: 30_000,
-      connectionTimeoutMillis: 15_000,
-      allowExitOnIdle: true,
-      keepAlive: true,
-    });
-  }
-  return authPool;
-}
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export interface AuthUser {
   id: string;
   email: string;
 }
 
-export async function getAuthUserByEmail(email: string): Promise<AuthUser | null> {
-  const pool = getAuthPool();
-  const result = await pool.query<{ id: string; email: string }>(
-    'SELECT id, email FROM "user" WHERE LOWER(TRIM(email)) = LOWER(TRIM($1))',
-    [email]
+export async function getAuthUserByEmail(
+  email: string
+): Promise<AuthUser | null> {
+  const supabase = createAdminClient();
+  const { data } = await supabase.auth.admin.listUsers({
+    page: 1,
+    perPage: 1000,
+  });
+
+  const normalizedEmail = email.toLowerCase().trim();
+  const user = (data.users ?? []).find(
+    (u) => u.email?.toLowerCase().trim() === normalizedEmail
   );
-  const row = result.rows[0];
-  return row ? { id: row.id, email: row.email } : null;
+
+  return user ? { id: user.id, email: user.email ?? "" } : null;
 }
 
 export async function getAuthUsersByIds(
@@ -38,14 +28,19 @@ export async function getAuthUsersByIds(
   if (ids.length === 0) {
     return new Map();
   }
-  const pool = getAuthPool();
-  const result = await pool.query<{ id: string; email: string }>(
-    'SELECT id, email FROM "user" WHERE id = ANY($1::text[])',
-    [ids]
-  );
+
+  const supabase = createAdminClient();
+  const { data } = await supabase.auth.admin.listUsers({
+    page: 1,
+    perPage: 1000,
+  });
+
   const map = new Map<string, string>();
-  for (const row of result.rows) {
-    map.set(row.id, row.email);
+  const idSet = new Set(ids);
+  for (const user of data.users ?? []) {
+    if (idSet.has(user.id) && user.email) {
+      map.set(user.id, user.email);
+    }
   }
   return map;
 }

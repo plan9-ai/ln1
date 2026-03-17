@@ -1,9 +1,9 @@
 import { sql } from "bun";
+import { ensureUserInAppDb } from "@/lib/ensure-user-in-app-db";
 import {
   getAuthUserByEmail,
   getAuthUsersByIds,
 } from "@/lib/get-auth-user-by-email";
-import { ensureUserInAppDb } from "@/lib/ensure-user-in-app-db";
 import type { CreateTeamBody, TeamWithRole } from "./model";
 
 const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -58,7 +58,12 @@ export const TeamsService = {
       JOIN teams t ON t.id = tm.team_id
       WHERE t.slug = ${slug} AND tm.user_id = ${userId}
     `;
-    return (row?.role ?? null) as "owner" | "admin" | "member" | "viewer" | null;
+    return (row?.role ?? null) as
+      | "owner"
+      | "admin"
+      | "member"
+      | "viewer"
+      | null;
   },
 
   async addMember(
