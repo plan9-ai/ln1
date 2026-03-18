@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionForRequest } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 function mapSupabaseUserToAppUser(u: {
   id: string;
@@ -9,8 +9,8 @@ function mapSupabaseUserToAppUser(u: {
   user_metadata?: Record<string, unknown>;
   app_metadata?: Record<string, unknown>;
   banned_until?: string | null;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }) {
   const role = (u.app_metadata?.role as string | undefined) ?? null;
   const name =
@@ -32,8 +32,8 @@ function mapSupabaseUserToAppUser(u: {
     banned: !!u.banned_until,
     banReason: null,
     banExpires: u.banned_until ? new Date(u.banned_until).getTime() : null,
-    createdAt: u.created_at,
-    updatedAt: u.updated_at,
+    createdAt: u.created_at ?? "",
+    updatedAt: u.updated_at ?? "",
   };
 }
 
@@ -74,7 +74,7 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
 
     const body = (await request.json()) as { role?: "admin" | "user" };
     const { role } = body;
-    if (!role || !["admin", "user"].includes(role)) {
+    if (!(role && ["admin", "user"].includes(role))) {
       return new Response(JSON.stringify({ error: "Invalid role" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },

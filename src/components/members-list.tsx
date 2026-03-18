@@ -62,8 +62,8 @@ export function MembersList({
           <ul className="divide-y divide-border">
             {members.map((member) => (
               <li
-                key={member.userId}
                 className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
+                key={member.userId}
               >
                 <div>
                   <span className="font-medium">{member.email}</span>
@@ -73,9 +73,9 @@ export function MembersList({
                 </div>
                 {canRemoveMember(member) && (
                   <Button
-                    variant="ghost"
-                    size="icon-sm"
                     onClick={() => handleRemove(member.userId)}
+                    size="icon-sm"
+                    variant="ghost"
                   >
                     <Trash2 className="size-4 text-destructive" />
                     <span className="sr-only">Remove</span>

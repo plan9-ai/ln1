@@ -16,7 +16,11 @@ import {
 } from "@/components/ui/sidebar";
 import type { TeamWithRole } from "@/modules/teams/model";
 
-function getNavMain(currentSlug: string) {
+function getNavMain(
+  currentSlug: string,
+  projects: { id: number; title: string }[]
+) {
+  const hasProjects = projects && projects.length > 0;
   return [
     {
       title: "My",
@@ -24,7 +28,12 @@ function getNavMain(currentSlug: string) {
       icon: Bot,
       items: [
         { title: "Notifcations", url: "#" },
-        { title: "Issues", url: "#" },
+        {
+          title: "Issues",
+          url: hasProjects
+            ? `/${currentSlug}/issues`
+            : `/${currentSlug}/projects/new`,
+        },
       ],
     },
     {
@@ -66,7 +75,6 @@ export function AppSidebar({
   user,
   ...props
 }: AppSidebarProps) {
-
   const linksItems = [
     { title: "Dashboard", url: `/${currentSlug}`, icon: LayoutDashboard },
   ];
@@ -79,7 +87,7 @@ export function AppSidebar({
       <SidebarContent>
         <NavMain
           currentSlug={currentSlug}
-          items={getNavMain(currentSlug)}
+          items={getNavMain(currentSlug, projects)}
           projects={projects}
         />
         <NavLinks items={linksItems} />

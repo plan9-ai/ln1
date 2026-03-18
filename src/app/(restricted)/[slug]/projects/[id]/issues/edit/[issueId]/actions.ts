@@ -1,6 +1,5 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAuthSession } from "@/lib/auth";
 import type { UpdateIssueBody } from "@/modules/issues/model";
@@ -12,7 +11,7 @@ export async function updateIssue(
   issueId: string,
   data: UpdateIssueBody
 ): Promise<void> {
-const session = await getAuthSession();
+  const session = await getAuthSession();
   if (!session) {
     redirect("/login");
   }

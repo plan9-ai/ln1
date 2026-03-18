@@ -1,6 +1,4 @@
-import { redirect } from "next/navigation";
-import { AddMemberForm } from "@/components/add-member-form";
-import { MembersList } from "@/components/members-list";
+import { IssuesTableAggregated } from "@/components/issues-table-aggregated";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,34 +10,25 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getAuthSession } from "@/lib/auth";
-import { TeamsService } from "@/modules/teams/service";
+import { IssuesService } from "@/modules/issues/service";
 
-export default async function MembersPage({
+export default async function IssuesPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const session = await getAuthSession();
   if (!session) {
-    redirect("/login");
+    return null;
   }
 
   const { slug } = await params;
-  const [members, currentRole] = await Promise.all([
-    TeamsService.getMembersByTeamSlug(session.user.id, slug),
-    TeamsService.getMemberRole(session.user.id, slug),
-  ]);
-
-  if (!currentRole) {
-    redirect(`/${slug}`);
-  }
-
-  const canAddMembers = currentRole === "owner" || currentRole === "admin";
+  const issues = await IssuesService.getAllIssuesForUser(session.user.id);
 
   return (
     <>
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-        <div className="flex items-center gap-2 px-4">
+        <div className="flex h-16 shrink-0 items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator
             className="mr-2 data-[orientation=vertical]:h-4"
@@ -47,27 +36,24 @@ export default async function MembersPage({
           />
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href={`/${slug}`}>Team</BreadcrumbLink>
+              <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbLink href={`/${slug}/projects/new`}>
+                  Projects
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Members</BreadcrumbPage>
+                <BreadcrumbPage>Issues</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col items-center p-4 pt-0">
-        <div className="w-full max-w-2xl">
-          {canAddMembers && <AddMemberForm slug={slug} />}
-          <MembersList
-            currentUserId={session.user.id}
-            currentUserRole={currentRole}
-            members={members}
-            slug={slug}
-          />
+      <div className="flex flex-1 flex-col pt-0 pb-4">
+        <div className="flex flex-col gap-4 px-4 lg:px-6">
+          <h1 className="font-semibold text-2xl">Issues</h1>
+          <IssuesTableAggregated issues={issues} />
         </div>
       </div>
     </>

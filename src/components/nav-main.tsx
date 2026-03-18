@@ -59,8 +59,10 @@ function renderProjectsSubItems(
   if (!projects || projects.length === 0) {
     return (
       <SidebarMenuSubItem>
-        <SidebarMenuSubButton className="cursor-default text-muted-foreground">
-          No projects
+        <SidebarMenuSubButton asChild>
+          <Link href={currentSlug ? `/${currentSlug}/projects/new` : "#"}>
+            <span>Create project</span>
+          </Link>
         </SidebarMenuSubButton>
       </SidebarMenuSubItem>
     );

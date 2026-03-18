@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CommentsList } from "@/components/comments-list";
@@ -25,7 +24,7 @@ export default async function ViewIssuePage({
 }: {
   params: Promise<{ slug: string; id: string; issueId: string }>;
 }) {
-const session = await getAuthSession();
+  const session = await getAuthSession();
   if (!session) {
     return null;
   }

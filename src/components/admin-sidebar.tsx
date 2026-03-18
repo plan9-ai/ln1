@@ -58,7 +58,6 @@ interface AdminSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AdminSidebar({ user, ...props }: AdminSidebarProps) {
-
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>

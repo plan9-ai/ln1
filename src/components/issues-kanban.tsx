@@ -76,10 +76,7 @@ async function reorderIssuesFetcher(
   }
 }
 
-async function moveIssueFetcher(
-  url: string,
-  { arg }: { arg: MoveIssueArg }
-) {
+async function moveIssueFetcher(url: string, { arg }: { arg: MoveIssueArg }) {
   const res = await fetch(`${url}/${arg.issueId}/move`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -171,10 +168,7 @@ export function IssuesKanban({
     };
   }, [issues, statusList, issuesByStatus]);
 
-  const { trigger: triggerReorder } = useSWRMutation(
-    url,
-    reorderIssuesFetcher
-  );
+  const { trigger: triggerReorder } = useSWRMutation(url, reorderIssuesFetcher);
   const { trigger: triggerMove } = useSWRMutation(url, moveIssueFetcher);
 
   const onCardMove = useCallback(
@@ -210,7 +204,11 @@ export function IssuesKanban({
         });
         triggerReorder(
           { statusId: sourceStatusId, issueIds },
-          { optimisticData: optimistic, rollbackOnError: true, revalidate: false }
+          {
+            optimisticData: optimistic,
+            rollbackOnError: true,
+            revalidate: false,
+          }
         ).catch(() => undefined);
         return;
       }

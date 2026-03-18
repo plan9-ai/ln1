@@ -86,10 +86,10 @@ export function AddMemberForm({ slug }: AddMemberFormProps) {
             <Field data-invalid={!!errors.role}>
               <FieldLabel htmlFor="member-role">Role</FieldLabel>
               <Select
-                value={roleValue}
                 onValueChange={(v) =>
                   setValue("role", v as InferAddMemberFormSchema["role"])
                 }
+                value={roleValue}
               >
                 <SelectTrigger id="member-role">
                   <SelectValue placeholder="Select role" />

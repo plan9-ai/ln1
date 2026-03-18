@@ -1,7 +1,12 @@
 import { sql } from "bun";
 import { ProjectStatusesService } from "@/modules/project-statuses/service";
 import { ProjectsService } from "@/modules/projects/service";
-import type { CreateIssueBody, IssueView, UpdateIssueBody } from "./model";
+import type {
+  CreateIssueBody,
+  IssueView,
+  IssueWithContext,
+  UpdateIssueBody,
+} from "./model";
 
 export const IssuesService = {
   async createIssue(
@@ -73,6 +78,21 @@ export const IssuesService = {
       WHERE i.id = ${issueId}
     `;
     return issue as IssueView | null;
+  },
+
+  async getAllIssuesForUser(userId: string): Promise<IssueWithContext[]> {
+    const issues = await sql`
+      SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status_id as "statusId",
+        pis.name as status, i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt",
+        t.slug as "teamSlug", p.title as "projectTitle"
+      FROM issues i
+      JOIN project_issue_statuses pis ON i.status_id = pis.id
+      JOIN projects p ON i.project_id = p.id
+      JOIN teams t ON p.team_id = t.id
+      JOIN team_members tm ON p.team_id = tm.team_id AND tm.user_id = ${userId}
+      ORDER BY i.updated_at DESC
+    `;
+    return (issues ?? []) as IssueWithContext[];
   },
 
   async getIssuesByProjectId(

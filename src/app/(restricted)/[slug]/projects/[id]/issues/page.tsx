@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { IssuesTablesByStatus } from "@/components/issues-tables-by-status";

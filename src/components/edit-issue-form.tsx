@@ -2,6 +2,7 @@
 
 import { typeboxResolver } from "@hookform/resolvers/typebox";
 import Link from "next/link";
+import { useCallback, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -31,6 +32,16 @@ import {
 } from "@/modules/issues/model";
 import type { ProjectStatusView } from "@/modules/project-statuses/service";
 
+interface UploadedFileView {
+  id: number;
+  key: string;
+  s3Path: string;
+  filename: string;
+  mimeType: string;
+  size: number;
+  createdAt: number;
+}
+
 interface EditIssueFormProps {
   issue: IssueView;
   projectId: string;
@@ -46,12 +57,111 @@ async function fetchStatuses(url: string): Promise<ProjectStatusView[]> {
   return res.json();
 }
 
+async function fetchAttachments(url: string): Promise<UploadedFileView[]> {
+  const res = await fetch(url, { credentials: "include" });
+  if (!res.ok) {
+    throw new Error("Failed to fetch attachments");
+  }
+  return res.json();
+}
+
 export function EditIssueForm({
   issue,
   projectId,
   projectStatuses,
   slug,
 }: EditIssueFormProps) {
+  const attachmentsKey = `issues-${issue.id}`;
+  const { data: attachments = [], mutate: mutateAttachments } = useSWR(
+    `/api/uploaded-files?key=${attachmentsKey}`,
+    fetchAttachments
+  );
+
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const uploadFile = useCallback(
+    (file: File): Promise<void> =>
+      new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("key", attachmentsKey);
+
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) {
+            setUploadProgress(Math.round((e.loaded / e.total) * 100));
+          }
+        });
+
+        xhr.addEventListener("load", () => {
+          setUploadProgress(null);
+          if (xhr.status >= 200 && xhr.status < 300) {
+            mutateAttachments().catch(() => {
+              /* ignore */
+            });
+            resolve();
+          } else {
+            reject(new Error(xhr.responseText || "Upload failed"));
+          }
+        });
+
+        xhr.addEventListener("error", () => {
+          setUploadProgress(null);
+          reject(new Error("Upload failed"));
+        });
+
+        xhr.open("POST", "/api/uploaded-files");
+        xhr.withCredentials = true;
+        xhr.send(formData);
+      }),
+    [attachmentsKey, mutateAttachments]
+  );
+
+  const handleFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (!files?.length) {
+        return;
+      }
+      try {
+        for (const file of Array.from(files)) {
+          await uploadFile(file);
+        }
+        toast.success("Files uploaded");
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to upload files"
+        );
+      } finally {
+        e.target.value = "";
+      }
+    },
+    [uploadFile]
+  );
+
+  const handleDeleteFile = useCallback(
+    async (id: number) => {
+      try {
+        const res = await fetch(`/api/uploaded-files/${id}`, {
+          credentials: "include",
+          method: "DELETE",
+        });
+        if (!res.ok) {
+          throw new Error("Failed to delete");
+        }
+        await mutateAttachments();
+        toast.success("File deleted");
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to delete file"
+        );
+      }
+    },
+    [mutateAttachments]
+  );
+
   const { data: statuses } = useSWR(
     `/api/projects/${projectId}/statuses`,
     fetchStatuses,
@@ -169,6 +279,62 @@ export function EditIssueForm({
               )}
             </Field>
           </FieldGroup>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Attachments</CardTitle>
+          <CardDescription>
+            Attach files to this issue. Click to download, or remove to delete.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <input
+              accept="*"
+              className="cursor-pointer text-sm file:mr-2 file:cursor-pointer file:rounded-md file:border-0 file:bg-primary file:px-4 file:py-2 file:font-medium file:text-primary-foreground file:text-sm file:hover:bg-primary/90"
+              multiple
+              onChange={handleFileChange}
+              ref={fileInputRef}
+              type="file"
+            />
+            {uploadProgress != null && (
+              <div className="h-2 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full bg-primary transition-[width] duration-200"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            )}
+          </div>
+          {attachments.length > 0 && (
+            <ul className="flex flex-col gap-2">
+              {attachments.map((f) => (
+                <li
+                  className="flex items-center justify-between rounded-md border px-3 py-2"
+                  key={f.id}
+                >
+                  <a
+                    className="text-primary hover:underline"
+                    href={`/api/uploaded-files/${f.id}/download`}
+                    rel="noopener"
+                    target="_blank"
+                  >
+                    {f.filename}
+                  </a>
+                  <Button
+                    onClick={() => handleDeleteFile(f.id)}
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                  >
+                    Remove
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
         </CardContent>
       </Card>
 

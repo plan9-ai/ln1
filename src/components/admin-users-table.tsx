@@ -207,11 +207,11 @@ function UserActions({ user }: { user: User }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ role }),
     });
-    if (!res.ok) {
+    if (res.ok) {
+      toast.success(`Role updated to ${role}`);
+    } else {
       const data = (await res.json()) as { error?: string };
       toast.error(data.error ?? "Failed to update role");
-    } else {
-      toast.success(`Role updated to ${role}`);
     }
   };
 
@@ -220,11 +220,11 @@ function UserActions({ user }: { user: User }) {
       credentials: "include",
       method: "POST",
     });
-    if (!res.ok) {
+    if (res.ok) {
+      toast.success("User banned");
+    } else {
       const data = (await res.json()) as { error?: string };
       toast.error(data.error ?? "Failed to ban user");
-    } else {
-      toast.success("User banned");
     }
   };
 
@@ -233,11 +233,11 @@ function UserActions({ user }: { user: User }) {
       credentials: "include",
       method: "POST",
     });
-    if (!res.ok) {
+    if (res.ok) {
+      toast.success("User unbanned");
+    } else {
       const data = (await res.json()) as { error?: string };
       toast.error(data.error ?? "Failed to unban user");
-    } else {
-      toast.success("User unbanned");
     }
   };
 

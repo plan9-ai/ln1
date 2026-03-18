@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { EditIssueForm } from "@/components/edit-issue-form";
 import {
@@ -21,7 +20,7 @@ export default async function EditIssuePage({
 }: {
   params: Promise<{ slug: string; id: string; issueId: string }>;
 }) {
-const session = await getAuthSession();
+  const session = await getAuthSession();
   if (!session) {
     return null;
   }

@@ -2,15 +2,31 @@ import "dotenv/config";
 import { ensureString } from "@/lib/utils";
 
 const DATABASE_URL = ensureString("DATABASE_URL");
+
+// SUPABASE
 const SUPABASE_ANON_KEY = ensureString("SUPABASE_ANON_KEY");
 const SUPABASE_UPLOADS_BUCKET = ensureString("SUPABASE_UPLOADS_BUCKET");
 const SUPABASE_URL = ensureString("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = ensureString("SUPABASE_SERVICE_ROLE_KEY");
 
+// RESEND
+const RESEND_SMTP_PASSWORD = ensureString("RESEND_SMTP_PASSWORD");
+const RESEND_SMTP_USERNAME = ensureString("RESEND_SMTP_USERNAME");
+const RESEND_SMTP_HOST = ensureString("RESEND_SMTP_HOST");
+const RESEND_SMTP_PORT = ensureString("RESEND_SMTP_PORT");
+const RESEND_API_KEY = ensureString("RESEND_API_KEY");
+
 export const appConfig = {
   DATABASE_URL,
+  // SUPABASE
   SUPABASE_ANON_KEY,
   SUPABASE_UPLOADS_BUCKET,
   SUPABASE_SERVICE_ROLE_KEY,
   SUPABASE_URL,
+  // RESEND
+  RESEND_SMTP_PASSWORD,
+  RESEND_SMTP_USERNAME,
+  RESEND_SMTP_HOST,
+  RESEND_SMTP_PORT,
+  RESEND_API_KEY,
 };

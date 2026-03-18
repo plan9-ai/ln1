@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { CreateIssueForm } from "@/components/create-issue-form";
 import {

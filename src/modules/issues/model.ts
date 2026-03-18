@@ -24,6 +24,11 @@ export interface IssueView {
   updatedAt: number;
 }
 
+export interface IssueWithContext extends IssueView {
+  teamSlug: string;
+  projectTitle: string;
+}
+
 export const createIssueFormSchema = Type.Object({
   title: Type.String({ minLength: 1 }),
   description: Type.Optional(Type.String()),

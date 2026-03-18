@@ -19,10 +19,11 @@ export async function signUp(email: string, password: string, name?: string) {
   console.log("[signUp] Registered email:", email);
 
   const admin = createAdminClient();
+  const isTestEmail = email.toLowerCase().endsWith(".test");
   const { error } = await admin.auth.admin.createUser({
     email,
     password,
-    email_confirm: true,
+    email_confirm: isTestEmail,
     user_metadata: { name: name ?? email.split("@")[0] },
   });
 

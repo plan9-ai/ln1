@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
-import { authEnsureSession } from "@/lib/ensure-user-in-app-db";
 import { getSessionForRequest } from "@/lib/auth";
+import { authEnsureSession } from "@/lib/ensure-user-in-app-db";
 import { CommentsService } from "@/modules/comments/service";
 import { IssuesService } from "@/modules/issues/service";
 import { ProjectStatusesService } from "@/modules/project-statuses/service";
