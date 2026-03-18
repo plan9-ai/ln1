@@ -87,7 +87,9 @@ export default async function ViewIssuePage({
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
         <div className="flex items-center gap-4">
           <Button asChild size="sm" variant="ghost">
-            <Link href={`/${slug}/projects/${id}`}>&larr; Back to project</Link>
+            <Link href={`/${slug}/projects/${id}/issues`}>
+              &larr; Back to project
+            </Link>
           </Button>
         </div>
 
