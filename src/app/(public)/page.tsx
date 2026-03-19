@@ -62,7 +62,7 @@ const logos = [
 ];
 
 const LandingPage = () => (
-  <div className="flex flex-col gap-16 px-8 pt-12 pb-24 text-center">
+  <div className="container mx-auto flex flex-col gap-16 px-8 pt-12 pb-24 text-center">
     <div className="flex flex-col items-center justify-center gap-8">
       <Link href="#">
         <Announcement>
