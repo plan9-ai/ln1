@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LN1 - do the job",
+  title: "LN1 - not the first but the one you need",
   description: "Free open source alternative to Linear",
   icons: {
     icon: [
