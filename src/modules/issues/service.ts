@@ -1,4 +1,7 @@
 import { sql } from "bun";
+import { appConfig } from "@/app.config";
+import { getAuthUsersByIds } from "@/lib/get-auth-user-by-email";
+import { sendIssueAssigneeEmail } from "@/lib/resend";
 import { ProjectStatusesService } from "@/modules/project-statuses/service";
 import { ProjectsService } from "@/modules/projects/service";
 import type {
@@ -7,6 +10,53 @@ import type {
   IssueWithContext,
   UpdateIssueBody,
 } from "./model";
+
+async function ensureAssigneeIsTeamMember(
+  projectId: number,
+  assigneeUserId: string
+): Promise<void> {
+  const [row] = await sql`
+    SELECT 1 AS ok
+    FROM team_members tm
+    INNER JOIN projects p ON p.team_id = tm.team_id
+    WHERE p.id = ${projectId} AND tm.user_id = ${assigneeUserId}
+    LIMIT 1
+  `;
+  if (!row) {
+    throw new Error("Invalid assignee");
+  }
+}
+
+async function tryNotifyNewAssignee(params: {
+  previousAssigneeUserId: string | null;
+  newAssigneeUserId: string | null;
+  teamSlug: string;
+  projectId: number;
+  issueId: number;
+  title: string;
+}): Promise<void> {
+  if (
+    !params.newAssigneeUserId ||
+    params.newAssigneeUserId === params.previousAssigneeUserId
+  ) {
+    return;
+  }
+  try {
+    const emails = await getAuthUsersByIds([params.newAssigneeUserId]);
+    const to = emails.get(params.newAssigneeUserId);
+    if (!to) {
+      return;
+    }
+    const issueUrl = `${appConfig.BASE_URL}/${params.teamSlug}/projects/${params.projectId}/issues/${params.issueId}`;
+    await sendIssueAssigneeEmail({
+      to,
+      issueTitle: params.title,
+      issueUrl,
+    });
+  } catch {
+    /* email must not fail issue save */
+  }
+}
 
 export const IssuesService = {
   async createIssue(
@@ -34,6 +84,11 @@ export const IssuesService = {
     }
 
     const description = data.description?.trim() ?? "";
+    const assigneeUserId = data.assigneeUserId ?? null;
+    if (assigneeUserId) {
+      await ensureAssigneeIsTeamMember(projectId, assigneeUserId);
+    }
+
     const now = Math.floor(Date.now() / 1000);
 
     const [issue] = await sql.begin(async (tx) => {
@@ -48,6 +103,7 @@ export const IssuesService = {
         title,
         description,
         status_id: data.statusId,
+        assignee_user_id: assigneeUserId,
         priority,
         created_at: now,
         updated_at: now,
@@ -61,6 +117,19 @@ export const IssuesService = {
     if (!issue) {
       throw new Error("Failed to create issue");
     }
+
+    const created = await this.getIssueById(userId, issue.id);
+    if (created?.teamSlug && assigneeUserId) {
+      await tryNotifyNewAssignee({
+        previousAssigneeUserId: null,
+        newAssigneeUserId: assigneeUserId,
+        teamSlug: created.teamSlug,
+        projectId,
+        issueId: issue.id,
+        title,
+      });
+    }
+
     return { id: issue.id };
   },
 
@@ -70,10 +139,13 @@ export const IssuesService = {
   ): Promise<IssueView | null> {
     const [issue] = await sql`
       SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status_id as "statusId",
-        pis.name as status, i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt"
+        i.assignee_user_id as "assigneeUserId",
+        pis.name as status, i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt",
+        t.slug as "teamSlug"
       FROM issues i
       JOIN project_issue_statuses pis ON i.status_id = pis.id
       JOIN projects p ON i.project_id = p.id
+      JOIN teams t ON p.team_id = t.id
       JOIN team_members tm ON p.team_id = tm.team_id AND tm.user_id = ${userId}
       WHERE i.id = ${issueId}
     `;
@@ -83,6 +155,7 @@ export const IssuesService = {
   async getAllIssuesForUser(userId: string): Promise<IssueWithContext[]> {
     const issues = await sql`
       SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status_id as "statusId",
+        i.assignee_user_id as "assigneeUserId",
         pis.name as status, i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt",
         t.slug as "teamSlug", p.title as "projectTitle"
       FROM issues i
@@ -101,6 +174,7 @@ export const IssuesService = {
   ): Promise<IssueView[]> {
     const issues = await sql`
       SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status_id as "statusId",
+        i.assignee_user_id as "assigneeUserId",
         pis.name as status, i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt"
       FROM issues i
       JOIN project_issue_statuses pis ON i.status_id = pis.id
@@ -137,13 +211,32 @@ export const IssuesService = {
     }
 
     const description = data.description?.trim() ?? "";
+    const newAssigneeUserId = data.assigneeUserId ?? null;
+    const previousAssigneeUserId = issue.assigneeUserId ?? null;
+    if (newAssigneeUserId) {
+      await ensureAssigneeIsTeamMember(issue.projectId, newAssigneeUserId);
+    }
+
     const now = Math.floor(Date.now() / 1000);
 
     await sql`
       UPDATE issues
-      SET title = ${title}, description = ${description}, status_id = ${data.statusId}, updated_at = ${now}
+      SET title = ${title}, description = ${description}, status_id = ${data.statusId},
+        assignee_user_id = ${newAssigneeUserId}, updated_at = ${now}
       WHERE id = ${issueId}
     `;
+
+    const teamSlug = issue.teamSlug;
+    if (teamSlug) {
+      await tryNotifyNewAssignee({
+        previousAssigneeUserId,
+        newAssigneeUserId,
+        teamSlug,
+        projectId: issue.projectId,
+        issueId,
+        title,
+      });
+    }
   },
 
   async updateIssuesPrioritiesInStatus(

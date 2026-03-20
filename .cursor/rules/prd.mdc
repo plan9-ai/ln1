@@ -1,0 +1,26 @@
+---
+description: LN1 project overview
+alwaysApply: true
+---
+
+# LN1 open source linear to alternative
+
+## General
+**url** https://ln1.one
+
+## Stack
+- **Bun** as main runtime, sql queries, package manager
+- **Supabase** for authentication
+
+## Process
+- Read src/app.config.ts for available configuration 
+
+## Features
+
+### Issues
+
+**Assignee**
+Each issue can have a user assigned to it. By default, an issue is unassigned.
+
+When the assignee of an issue changes, the new assignee should receive an email via Resend.
+The email must contain a link to the issue.

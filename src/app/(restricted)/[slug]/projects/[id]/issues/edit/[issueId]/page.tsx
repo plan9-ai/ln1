@@ -14,6 +14,7 @@ import { getAuthSession } from "@/lib/auth";
 import { IssuesService } from "@/modules/issues/service";
 import { ProjectStatusesService } from "@/modules/project-statuses/service";
 import { ProjectsService } from "@/modules/projects/service";
+import { TeamsService } from "@/modules/teams/service";
 
 export default async function EditIssuePage({
   params,
@@ -47,6 +48,11 @@ export default async function EditIssuePage({
   const projectStatuses = await ProjectStatusesService.getStatusesByProjectId(
     session.user.id,
     issue.projectId
+  );
+
+  const teamMembers = await TeamsService.getMembersByTeamSlug(
+    session.user.id,
+    slug
   );
 
   return (
@@ -93,6 +99,7 @@ export default async function EditIssuePage({
             projectId={id}
             projectStatuses={projectStatuses}
             slug={slug}
+            teamMembers={teamMembers}
           />
         </div>
       </div>

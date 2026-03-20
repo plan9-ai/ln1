@@ -15,6 +15,10 @@ const RESEND_SMTP_USERNAME = ensureString("RESEND_SMTP_USERNAME");
 const RESEND_SMTP_HOST = ensureString("RESEND_SMTP_HOST");
 const RESEND_SMTP_PORT = ensureString("RESEND_SMTP_PORT");
 const RESEND_API_KEY = ensureString("RESEND_API_KEY");
+const RESEND_FROM_EMAIL = ensureString("RESEND_FROM_EMAIL");
+
+// APP
+const BASE_URL = ensureString("BASE_URL");
 
 export const appConfig = {
   DATABASE_URL,
@@ -29,4 +33,7 @@ export const appConfig = {
   RESEND_SMTP_HOST,
   RESEND_SMTP_PORT,
   RESEND_API_KEY,
+  RESEND_FROM_EMAIL,
+  // APP
+  BASE_URL,
 };

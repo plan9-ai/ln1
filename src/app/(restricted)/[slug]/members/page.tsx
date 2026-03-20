@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { AddMemberForm } from "@/components/add-member-form";
+import { InvitesTable } from "@/components/invites-table";
 import { MembersList } from "@/components/members-list";
 import {
   Breadcrumb,
@@ -12,6 +13,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getAuthSession } from "@/lib/auth";
+import { TeamInvitesService } from "@/modules/team-invites/service";
 import { TeamsService } from "@/modules/teams/service";
 
 export default async function MembersPage({
@@ -25,9 +27,10 @@ export default async function MembersPage({
   }
 
   const { slug } = await params;
-  const [members, currentRole] = await Promise.all([
+  const [members, currentRole, invites] = await Promise.all([
     TeamsService.getMembersByTeamSlug(session.user.id, slug),
     TeamsService.getMemberRole(session.user.id, slug),
+    TeamInvitesService.getPendingInvitesByTeamSlug(session.user.id, slug),
   ]);
 
   if (!currentRole) {
@@ -68,6 +71,13 @@ export default async function MembersPage({
             members={members}
             slug={slug}
           />
+          {canAddMembers && (
+            <InvitesTable
+              canManage={canAddMembers}
+              invites={invites}
+              slug={slug}
+            />
+          )}
         </div>
       </div>
     </>

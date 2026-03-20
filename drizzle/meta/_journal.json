@@ -15,6 +15,20 @@
       "when": 1773750870847,
       "tag": "0001_striped_ben_parker",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773882448775,
+      "tag": "0002_deep_venus",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1773985455093,
+      "tag": "0003_rare_zeigeist",
+      "breakpoints": true
     }
   ]
 }

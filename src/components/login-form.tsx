@@ -16,10 +16,15 @@ import { Input } from "@/components/ui/input";
 import { signIn } from "@/lib/auth-actions";
 import { cn } from "@/lib/utils";
 
+interface LoginFormProps extends React.ComponentProps<"div"> {
+  callbackUrl?: string;
+}
+
 export function LoginForm({
   className,
+  callbackUrl,
   ...props
-}: React.ComponentProps<"div">) {
+}: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,7 +33,7 @@ export function LoginForm({
     e.preventDefault();
     setLoading(true);
 
-    const result = await signIn(email, password);
+    const result = await signIn(email, password, callbackUrl);
 
     if (result?.error) {
       toast.error(result.error.message ?? "Failed to sign in");

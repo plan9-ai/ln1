@@ -3,7 +3,7 @@
 import { typeboxResolver } from "@hookform/resolvers/typebox";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { addTeamMember } from "@/app/(restricted)/[slug]/members/actions";
+import { createTeamInvite } from "@/app/(restricted)/[slug]/members/actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -50,10 +50,10 @@ export function AddMemberForm({ slug }: AddMemberFormProps) {
 
   const onSubmit = async (data: InferAddMemberFormSchema) => {
     try {
-      await addTeamMember(slug, data.email, data.role);
+      await createTeamInvite(slug, data.email, data.role);
       reset();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to add member");
+      toast.error(err instanceof Error ? err.message : "Failed to invite");
     }
   };
 
@@ -61,9 +61,10 @@ export function AddMemberForm({ slug }: AddMemberFormProps) {
     <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
       <Card>
         <CardHeader>
-          <CardTitle>Add member</CardTitle>
+          <CardTitle>Invite member</CardTitle>
           <CardDescription>
-            Add a member to the team by email. The user must have an account.
+            Invite a member to the team by email. The user must have an account.
+            They will receive an email with an invitation link.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -112,7 +113,7 @@ export function AddMemberForm({ slug }: AddMemberFormProps) {
 
       <div className="flex justify-end">
         <Button disabled={isSubmitting} size="lg" type="submit">
-          Add member
+          Send invitation
         </Button>
       </div>
     </form>

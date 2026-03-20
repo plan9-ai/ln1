@@ -28,11 +28,15 @@ import {
   type InferCreateIssueFormSchema,
 } from "@/modules/issues/model";
 import type { ProjectStatusView } from "@/modules/project-statuses/service";
+import type { TeamMemberWithEmail } from "@/modules/teams/service";
+
+const ASSIGNEE_NONE_VALUE = "__none__";
 
 interface CreateIssueFormProps {
   projectId: string;
   projectStatuses: ProjectStatusView[];
   slug: string;
+  teamMembers: TeamMemberWithEmail[];
 }
 
 async function fetchStatuses(url: string): Promise<ProjectStatusView[]> {
@@ -47,6 +51,7 @@ export function CreateIssueForm({
   projectId,
   projectStatuses,
   slug,
+  teamMembers,
 }: CreateIssueFormProps) {
   const { data: statuses } = useSWR(
     `/api/projects/${projectId}/statuses`,
@@ -67,6 +72,7 @@ export function CreateIssueForm({
       title: "",
       description: "",
       statusId: defaultStatusId ?? 0,
+      assigneeUserId: null,
     },
   });
 
@@ -76,6 +82,7 @@ export function CreateIssueForm({
         title: data.title,
         description: data.description ?? "",
         statusId: data.statusId,
+        assigneeUserId: data.assigneeUserId,
       });
     } catch (err) {
       toast.error(
@@ -156,6 +163,46 @@ export function CreateIssueForm({
               {errors.statusId && (
                 <span className="text-destructive text-sm">
                   {errors.statusId.message}
+                </span>
+              )}
+            </Field>
+            <Field data-invalid={!!errors.assigneeUserId}>
+              <FieldLabel htmlFor="assignee">Assignee</FieldLabel>
+              <Controller
+                control={control}
+                name="assigneeUserId"
+                render={({ field }) => (
+                  <Select
+                    onValueChange={(v) =>
+                      field.onChange(v === ASSIGNEE_NONE_VALUE ? null : v)
+                    }
+                    value={
+                      field.value != null ? field.value : ASSIGNEE_NONE_VALUE
+                    }
+                  >
+                    <SelectTrigger
+                      aria-invalid={!!errors.assigneeUserId}
+                      className="w-full"
+                      id="assignee"
+                    >
+                      <SelectValue placeholder="Unassigned" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ASSIGNEE_NONE_VALUE}>
+                        Unassigned
+                      </SelectItem>
+                      {teamMembers.map((m) => (
+                        <SelectItem key={m.userId} value={m.userId}>
+                          {m.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.assigneeUserId && (
+                <span className="text-destructive text-sm">
+                  {errors.assigneeUserId.message}
                 </span>
               )}
             </Field>

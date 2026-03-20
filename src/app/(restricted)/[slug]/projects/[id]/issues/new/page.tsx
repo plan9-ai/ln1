@@ -13,6 +13,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getAuthSession } from "@/lib/auth";
 import { ProjectStatusesService } from "@/modules/project-statuses/service";
 import { ProjectsService } from "@/modules/projects/service";
+import { TeamsService } from "@/modules/teams/service";
 
 export default async function NewIssuePage({
   params,
@@ -41,6 +42,11 @@ export default async function NewIssuePage({
   const projectStatuses = await ProjectStatusesService.getStatusesByProjectId(
     session.user.id,
     projectId
+  );
+
+  const teamMembers = await TeamsService.getMembersByTeamSlug(
+    session.user.id,
+    slug
   );
 
   return (
@@ -87,6 +93,7 @@ export default async function NewIssuePage({
             projectId={id}
             projectStatuses={projectStatuses}
             slug={slug}
+            teamMembers={teamMembers}
           />
         </div>
       </div>

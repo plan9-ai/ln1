@@ -4,7 +4,11 @@ import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-export async function signIn(email: string, password: string) {
+export async function signIn(
+  email: string,
+  password: string,
+  callbackUrl?: string
+) {
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
@@ -12,18 +16,17 @@ export async function signIn(email: string, password: string) {
     return { error: { message: error.message } };
   }
 
-  redirect("/app");
+  redirect(callbackUrl ?? "/app");
 }
 
 export async function signUp(email: string, password: string, name?: string) {
   console.log("[signUp] Registered email:", email);
 
   const admin = createAdminClient();
-  const isTestEmail = email.toLowerCase().endsWith(".test");
   const { error } = await admin.auth.admin.createUser({
     email,
     password,
-    email_confirm: isTestEmail,
+    email_confirm: true,
     user_metadata: { name: name ?? email.split("@")[0] },
   });
 

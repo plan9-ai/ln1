@@ -8,6 +8,7 @@ import {
 
 import { projectIssueStatusesTable } from "./project-issue-statuses";
 import { projectsTable } from "./projects";
+import { usersTable } from "./users";
 
 export const issuesTable = table("issues", {
   id: serial("id").primaryKey(),
@@ -17,6 +18,9 @@ export const issuesTable = table("issues", {
   statusId: integer("status_id")
     .notNull()
     .references(() => projectIssueStatusesTable.id, { onDelete: "restrict" }),
+  assigneeUserId: text("assignee_user_id").references(() => usersTable.id, {
+    onDelete: "set null",
+  }),
   title: text("title").notNull(),
   description: text("description").notNull().default(""),
   priority: integer("priority").notNull().default(0),

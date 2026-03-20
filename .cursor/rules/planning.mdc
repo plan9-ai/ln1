@@ -1,0 +1,6 @@
+---
+description: Always use this rule when planning. 
+alwaysApply: true
+---
+
+**Plan in detail**, providing code examples based on current codebase and clear instructions so that even a haiku-level model can implement your plan.
