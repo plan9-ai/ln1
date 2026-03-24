@@ -6,6 +6,9 @@ alwaysApply: false
 ## General 
 - Always use { onDelete: "cascade" }
 
+## Migrations
+- Apply and generate migrations with **`bun run migrate`** (runs `drizzle-kit generate` then `drizzle-kit migrate`). Use this when schema changes need to be reflected in the database.
+
 ## Framework nuances
 https://orm.drizzle.team/docs/get-started-postgresql
 https://orm.drizzle.team/docs/sql-schema-declaration

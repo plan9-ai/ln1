@@ -24,3 +24,12 @@ Each issue can have a user assigned to it. By default, an issue is unassigned.
 
 When the assignee of an issue changes, the new assignee should receive an email via Resend.
 The email must contain a link to the issue.
+
+### Notifications
+Notifications system is a separate module. There is separate notification table. 
+Every notification have a link to the entity its related to(example: notifcation can be linked to 
+isses, teams etc. so notification should have a key `issues-1`, `issues-2`, `teams-1` etc.)
+
+Users received notifications via `resend` scan code fore examples. User receives notifications when 
+- added to team members 
+- added as assignee

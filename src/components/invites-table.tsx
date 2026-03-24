@@ -60,6 +60,7 @@ export function InvitesTable({ slug, invites, canManage }: InvitesTableProps) {
               <TableRow>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Invited at</TableHead>
                 {canManage && (
                   <TableHead className="w-[100px]">Actions</TableHead>
@@ -71,6 +72,7 @@ export function InvitesTable({ slug, invites, canManage }: InvitesTableProps) {
                 <TableRow key={invite.id}>
                   <TableCell>{invite.email}</TableCell>
                   <TableCell>{invite.role}</TableCell>
+                  <TableCell>{invite.status}</TableCell>
                   <TableCell>{formatDate(invite.createdAt)}</TableCell>
                   {canManage && (
                     <TableCell>

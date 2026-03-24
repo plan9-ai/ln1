@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAuthSession } from "@/lib/auth";
+import { signOut } from "@/lib/auth-actions";
+import { logger } from "@/lib/logger";
 import { TeamInvitesService } from "@/modules/team-invites/service";
 
 export default async function InviteAcceptPage({
@@ -45,21 +47,24 @@ export default async function InviteAcceptPage({
       token
     );
     redirect(`/${slug}`);
-  } catch {
+  } catch (err) {
+    logger.error({ err }, "invite/accept error");
+    const inviteUrl = `/invite/accept?token=${token}`;
     return (
       <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Invalid or expired invitation</CardTitle>
+            <CardTitle>Wrong account</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              This invitation is invalid, has expired, or was sent to a
-              different email address.
+              You are signed in as <strong>{session.user.email}</strong>, but
+              this invitation was sent to a different email address. Sign out
+              and sign in with the correct account.
             </p>
-            <Button asChild className="mt-4">
-              <Link href="/app">Go to dashboard</Link>
-            </Button>
+            <form action={signOut.bind(null, inviteUrl)} className="mt-4">
+              <Button type="submit">Sign out</Button>
+            </form>
           </CardContent>
         </Card>
       </div>

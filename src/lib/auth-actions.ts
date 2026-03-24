@@ -47,8 +47,37 @@ export async function signUp(email: string, password: string, name?: string) {
   redirect("/app");
 }
 
-export async function signOut() {
+export async function signOut(callbackUrl?: string) {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/login");
+  redirect(
+    callbackUrl
+      ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+      : "/login"
+  );
+}
+
+export async function requestPasswordReset(email: string) {
+  const supabase = await createClient();
+  const { appConfig } = await import("@/app.config");
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${appConfig.BASE_URL}/auth/callback?next=/reset-password`,
+  });
+
+  if (error) {
+    return { error: { message: error.message } };
+  }
+
+  return { error: null };
+}
+
+export async function resetPassword(password: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    return { error: { message: error.message } };
+  }
+
+  redirect("/app");
 }

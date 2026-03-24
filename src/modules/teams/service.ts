@@ -4,6 +4,7 @@ import {
   getAuthUserByEmail,
   getAuthUsersByIds,
 } from "@/lib/get-auth-user-by-email";
+import { notifyTeamMemberJoined } from "@/modules/notifications/service";
 import type { CreateTeamBody, TeamWithRole } from "./model";
 
 const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -89,11 +90,32 @@ export const TeamsService = {
 
     await ensureUserInAppDb(authUser.id);
 
+    const [existingMember] = await sql`
+      SELECT 1 FROM team_members
+      WHERE user_id = ${authUser.id} AND team_id = ${team.id}
+    `;
+
     await sql`
       INSERT INTO team_members (user_id, team_id, role)
       VALUES (${authUser.id}, ${team.id}, ${role})
       ON CONFLICT (user_id, team_id) DO UPDATE SET role = EXCLUDED.role
     `;
+
+    if (!existingMember) {
+      const [teamRow] = await sql`
+        SELECT title, slug FROM teams WHERE id = ${team.id}
+      `;
+      const meta = teamRow as { title: string; slug: string } | undefined;
+      if (meta) {
+        await notifyTeamMemberJoined({
+          userId: authUser.id,
+          toEmail: email.trim(),
+          teamId: team.id,
+          teamSlug: meta.slug,
+          teamName: meta.title,
+        });
+      }
+    }
   },
 
   async removeMember(

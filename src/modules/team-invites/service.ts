@@ -4,12 +4,14 @@ import { appConfig } from "@/app.config";
 import { ensureUserInAppDb } from "@/lib/ensure-user-in-app-db";
 import { getAuthUserByEmail } from "@/lib/get-auth-user-by-email";
 import { sendTeamInviteEmail } from "@/lib/resend";
+import { notifyTeamMemberJoined } from "@/modules/notifications/service";
 import { TeamsService } from "@/modules/teams/service";
 
 export interface TeamInviteWithMeta {
   id: number;
   email: string;
   role: "admin" | "member" | "viewer";
+  status: "pending" | "accepted";
   createdAt: number;
 }
 
@@ -97,17 +99,24 @@ export const TeamInvitesService = {
     }
 
     const rows = (await sql`
-      SELECT ti.id, ti.email, ti.role, ti.created_at as "createdAt"
+      SELECT ti.id, ti.email, ti.role, ti.status, ti.created_at as "createdAt"
       FROM team_invites ti
       JOIN teams t ON t.id = ti.team_id
       WHERE t.slug = ${slug} AND ti.status = 'pending'
       ORDER BY ti.created_at DESC
-    `) as { id: number; email: string; role: string; createdAt: number }[];
+    `) as {
+      id: number;
+      email: string;
+      role: string;
+      status: string;
+      createdAt: number;
+    }[];
 
     return (Array.isArray(rows) ? rows : []).map((r) => ({
       id: r.id,
       email: r.email,
       role: r.role as "admin" | "member" | "viewer",
+      status: r.status as "pending" | "accepted",
       createdAt: r.createdAt,
     }));
   },
@@ -141,6 +150,11 @@ export const TeamInvitesService = {
 
     await ensureUserInAppDb(userId);
 
+    const [existingMember] = await sql`
+      SELECT 1 FROM team_members
+      WHERE user_id = ${userId} AND team_id = ${inv.teamId}
+    `;
+
     await sql.begin(async (tx) => {
       await tx`
         INSERT INTO team_members (user_id, team_id, role)
@@ -153,13 +167,24 @@ export const TeamInvitesService = {
     });
 
     const [teamRow] = await sql`
-      SELECT slug FROM teams WHERE id = ${inv.teamId}
+      SELECT slug, title FROM teams WHERE id = ${inv.teamId}
     `;
-    const slug = (teamRow as { slug: string } | undefined)?.slug;
-    if (!slug) {
+    const team = teamRow as { slug: string; title: string } | undefined;
+    if (!team) {
       throw new Error("Team not found");
     }
-    return { slug };
+
+    if (!existingMember) {
+      await notifyTeamMemberJoined({
+        userId,
+        toEmail: inv.email.trim(),
+        teamId: inv.teamId,
+        teamSlug: team.slug,
+        teamName: team.title,
+      });
+    }
+
+    return { slug: team.slug };
   },
 
   async resendInvite(actorUserId: string, inviteId: number): Promise<void> {
