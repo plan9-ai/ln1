@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { ProjectsInsert } from "@/db/schema/projects";
 import { getAuthSession } from "@/lib/auth";
@@ -15,5 +16,6 @@ export async function createProject(
   }
 
   await ProjectsService.createProject(session.user.id, teamSlug, data);
+  revalidatePath(`/${teamSlug}`, "layout");
   redirect(`/${teamSlug}`);
 }

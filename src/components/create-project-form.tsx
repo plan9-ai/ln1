@@ -16,9 +16,9 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  type ProjectsInsert,
-  projectsInsertSchema,
-} from "@/db/schema/projects";
+  createProjectFormSchema,
+  type InferCreateProjectFormSchema,
+} from "@/modules/projects/model";
 
 interface CreateProjectFormProps {
   teamSlug: string;
@@ -29,18 +29,15 @@ export function CreateProjectForm({ teamSlug }: CreateProjectFormProps) {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<ProjectsInsert>({
-    resolver: typeboxResolver(projectsInsertSchema),
+  } = useForm<InferCreateProjectFormSchema>({
+    resolver: typeboxResolver(createProjectFormSchema),
     defaultValues: {
-      teamId: 0,
       title: "",
       description: "",
-      createdAt: 0,
-      updatedAt: 0,
     },
   });
 
-  const onSubmit = async (data: ProjectsInsert) => {
+  const onSubmit = async (data: InferCreateProjectFormSchema) => {
     try {
       await createProject(teamSlug, {
         title: data.title,
@@ -79,12 +76,18 @@ export function CreateProjectForm({ teamSlug }: CreateProjectFormProps) {
               )}
             </Field>
             <Field data-invalid={!!errors.description}>
-              <FieldLabel htmlFor="description">Description</FieldLabel>
+              <FieldLabel htmlFor="description">
+                Description
+                <span className="font-normal text-muted-foreground">
+                  (optional)
+                </span>
+              </FieldLabel>
               <Textarea
                 aria-invalid={!!errors.description}
+                className="resize-none"
                 id="description"
                 placeholder="Brief description of the project..."
-                rows={3}
+                rows={6}
                 {...register("description")}
               />
               {errors.description && (

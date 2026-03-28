@@ -1,4 +1,4 @@
-import { Type } from "@sinclair/typebox";
+import { type Static, Type } from "@sinclair/typebox";
 
 export const projectIdParamsSchema = Type.Object({
   id: Type.Number(),
@@ -33,3 +33,12 @@ export interface MoveIssueBody {
   targetStatusId: number;
   targetIndex: number;
 }
+
+export const createProjectFormSchema = Type.Object({
+  title: Type.String({ minLength: 1 }),
+  description: Type.Optional(Type.String()),
+});
+
+export type InferCreateProjectFormSchema = Static<
+  typeof createProjectFormSchema
+>;

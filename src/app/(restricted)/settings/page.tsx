@@ -1,4 +1,3 @@
-import { IssuesTableAggregated } from "@/components/issues-table-aggregated";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,21 +7,11 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getAuthSession } from "@/lib/auth";
-import { IssuesService } from "@/modules/issues/service";
+import { VerificationEmailButton } from "./verification-email-button";
 
-export default async function TeamDashboardPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function SettingsPage() {
   const session = await getAuthSession();
-  if (!session) {
-    return null;
-  }
-
-  const _params = await params;
-  const issues = await IssuesService.getAllIssuesForUser(session.user.id);
-
+  const email = session?.user.email ?? "";
   return (
     <>
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -35,17 +24,28 @@ export default async function TeamDashboardPage({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbPage>Issues</BreadcrumbPage>
+                <BreadcrumbPage>Settings</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col pt-0 pb-4">
-        <div className="flex flex-col gap-4 px-4 lg:px-6">
-          <h1 className="font-semibold text-2xl">Issues</h1>
-          <IssuesTableAggregated issues={issues} />
+      <div className="flex flex-1 flex-col items-center p-4 pt-0">
+        <div className="w-full max-w-2xl">
+          <div className="mb-8 text-center">
+            <h1 className="font-semibold text-2xl">Settings</h1>
+            <p className="mt-2 text-muted-foreground text-sm">
+              Manage your account settings.
+            </p>
+          </div>
+          <div className="rounded-lg border p-6">
+            <h2 className="mb-2 font-medium text-lg">Email Verification</h2>
+            <p className="mb-4 text-muted-foreground text-sm">
+              Send a verification email to confirm your email address.
+            </p>
+            <VerificationEmailButton email={email} />
+          </div>
         </div>
       </div>
     </>
