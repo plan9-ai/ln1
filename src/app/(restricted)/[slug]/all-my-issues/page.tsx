@@ -1,4 +1,5 @@
 import { IssuesTableAggregated } from "@/components/issues-table-aggregated";
+import { NewIssueButton } from "@/components/new-issue-button";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getAuthSession } from "@/lib/auth";
 import { IssuesService } from "@/modules/issues/service";
+import { ProjectsService } from "@/modules/projects/service";
 
 export default async function IssuesPage({
   params,
@@ -23,7 +25,10 @@ export default async function IssuesPage({
   }
 
   const { slug } = await params;
-  const issues = await IssuesService.getAllIssuesForUser(session.user.id);
+  const [issues, projects] = await Promise.all([
+    IssuesService.getAllIssuesForUser(session.user.id),
+    ProjectsService.getProjectsByTeamSlug(session.user.id, slug),
+  ]);
 
   return (
     <>
@@ -52,7 +57,15 @@ export default async function IssuesPage({
 
       <div className="flex flex-1 flex-col pt-0 pb-4">
         <div className="flex flex-col gap-4 px-4 lg:px-6">
-          <h1 className="font-semibold text-2xl">Issues</h1>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="font-semibold text-2xl">Issues</h1>
+              <p className="text-muted-foreground text-sm">
+                All issues assigned to you across all teams
+              </p>
+            </div>
+            <NewIssueButton projects={projects} />
+          </div>
           <IssuesTableAggregated issues={issues} />
         </div>
       </div>

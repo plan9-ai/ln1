@@ -152,6 +152,26 @@ export const IssuesService = {
     return issue as IssueView | null;
   },
 
+  async getIssuesByTeamSlug(
+    userId: string,
+    teamSlug: string
+  ): Promise<IssueWithContext[]> {
+    const issues = await sql`
+      SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status_id as "statusId",
+        i.assignee_user_id as "assigneeUserId",
+        pis.name as status, i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt",
+        t.slug as "teamSlug", p.title as "projectTitle"
+      FROM issues i
+      JOIN project_issue_statuses pis ON i.status_id = pis.id
+      JOIN projects p ON i.project_id = p.id
+      JOIN teams t ON p.team_id = t.id
+      JOIN team_members tm ON p.team_id = tm.team_id AND tm.user_id = ${userId}
+      WHERE t.slug = ${teamSlug}
+      ORDER BY i.updated_at DESC
+    `;
+    return (issues ?? []) as IssueWithContext[];
+  },
+
   async getAllIssuesForUser(userId: string): Promise<IssueWithContext[]> {
     const issues = await sql`
       SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status_id as "statusId",

@@ -31,7 +31,7 @@ function getNavMain(
         {
           title: "Issues",
           url: hasProjects
-            ? `/${currentSlug}/issues`
+            ? `/${currentSlug}/all-my-issues`
             : `/${currentSlug}/projects/new`,
         },
       ],
