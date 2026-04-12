@@ -1,4 +1,3 @@
-import "dotenv/config";
 import { ensureString } from "@/lib/utils";
 
 const DATABASE_URL = ensureString("DATABASE_URL");
@@ -19,6 +18,7 @@ const RESEND_FROM_EMAIL = ensureString("RESEND_FROM_EMAIL");
 
 // APP
 const BASE_URL = ensureString("BASE_URL");
+const API_TOKEN = process.env.API_TOKEN ?? "";
 
 export const appConfig = {
   DATABASE_URL,
@@ -36,4 +36,5 @@ export const appConfig = {
   RESEND_FROM_EMAIL,
   // APP
   BASE_URL,
+  API_TOKEN,
 };

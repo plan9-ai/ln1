@@ -58,23 +58,43 @@ function renderProjectsSubItems(
   }
   if (!projects || projects.length === 0) {
     return (
-      <SidebarMenuSubItem>
-        <SidebarMenuSubButton asChild>
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild>
           <Link href={currentSlug ? `/${currentSlug}/projects/new` : "#"}>
             <span>Create project</span>
           </Link>
-        </SidebarMenuSubButton>
-      </SidebarMenuSubItem>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
     );
   }
   return projects.map((p) => (
-    <SidebarMenuSubItem key={p.id}>
-      <SidebarMenuSubButton asChild>
+    <SidebarMenuItem key={p.id}>
+      <SidebarMenuButton asChild>
         <Link href={`/${currentSlug}/projects/${p.id}/issues`}>
           <span>{p.title}</span>
         </Link>
-      </SidebarMenuSubButton>
-    </SidebarMenuSubItem>
+      </SidebarMenuButton>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <SidebarMenuAction>
+            <MoreHorizontal />
+            <span className="sr-only">Project settings</span>
+          </SidebarMenuAction>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="start"
+          className="w-48 rounded-lg"
+          side="right"
+        >
+          <DropdownMenuItem asChild>
+            <Link href={`/${currentSlug}/projects/${p.id}/edit`}>
+              <Settings />
+              <span>Settings</span>
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </SidebarMenuItem>
   ));
 }
 
@@ -164,9 +184,15 @@ export function NavMain({
                 </DropdownMenu>
               )}
               <CollapsibleContent>
-                <SidebarMenuSub>
-                  {renderProjectsSubItems(item, projects, currentSlug)}
-                </SidebarMenuSub>
+                {item.title === "Projects" ? (
+                  <SidebarMenu>
+                    {renderProjectsSubItems(item, projects, currentSlug)}
+                  </SidebarMenu>
+                ) : (
+                  <SidebarMenuSub>
+                    {renderProjectsSubItems(item, projects, currentSlug)}
+                  </SidebarMenuSub>
+                )}
               </CollapsibleContent>
             </SidebarMenuItem>
           </Collapsible>

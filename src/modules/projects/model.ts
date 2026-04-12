@@ -42,3 +42,14 @@ export const createProjectFormSchema = Type.Object({
 export type InferCreateProjectFormSchema = Static<
   typeof createProjectFormSchema
 >;
+
+export const updateProjectFormSchema = Type.Object({
+  title: Type.String({ minLength: 1 }),
+  description: Type.Optional(Type.String()),
+  agents: Type.Optional(Type.String()),
+  repository: Type.Optional(Type.String()),
+});
+
+export type InferUpdateProjectFormSchema = Static<
+  typeof updateProjectFormSchema
+>;

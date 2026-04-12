@@ -20,6 +20,7 @@ export const projectIssueStatusesTable = table("project_issue_statuses", {
     .notNull()
     .references(() => projectsTable.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
+  slug: text("slug").notNull().default(""),
   priority: integer("priority").notNull(),
   isDefault: boolean("is_default").notNull().default(false),
 });

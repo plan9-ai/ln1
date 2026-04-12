@@ -21,6 +21,7 @@ export interface IssueView {
   description: string;
   statusId: number;
   status: string;
+  statusSlug: string;
   priority: number;
   assigneeUserId: string | null;
   createdAt: number;

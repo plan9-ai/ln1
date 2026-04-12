@@ -1,12 +1,13 @@
 "use client";
 
 import { typeboxResolver } from "@hookform/resolvers/typebox";
-import { useForm } from "react-hook-form";
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { insertComment } from "@/app/(restricted)/[slug]/projects/[id]/issues/[issueId]/actions";
+import { MarkdownEditor } from "@/components/markdown-editor";
 import { Button } from "@/components/ui/button";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
+import { Field, FieldLabel } from "@/components/ui/field";
 import {
   type InsertCommentBody,
   insertCommentBodySchema,
@@ -25,9 +26,10 @@ export function InsertCommentForm({
   issueId,
   onSuccess,
 }: InsertCommentFormProps) {
+  const [editorKey, setEditorKey] = useState(0);
   const {
-    register,
     handleSubmit,
+    control,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<InsertCommentBody>({
@@ -41,6 +43,7 @@ export function InsertCommentForm({
     try {
       await insertComment(slug, projectId, issueId, { body: data.body });
       reset();
+      setEditorKey((k) => k + 1);
       onSuccess?.();
     } catch (err) {
       toast.error(
@@ -51,23 +54,27 @@ export function InsertCommentForm({
 
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
-      <FieldGroup>
-        <Field data-invalid={!!errors.body}>
-          <FieldLabel htmlFor="body">Comment</FieldLabel>
-          <Textarea
-            aria-invalid={!!errors.body}
-            id="body"
-            placeholder="Write a comment..."
-            rows={3}
-            {...register("body")}
-          />
-          {errors.body && (
-            <span className="text-destructive text-sm">
-              {errors.body.message}
-            </span>
+      <Field data-invalid={!!errors.body}>
+        <FieldLabel htmlFor="body">Comment</FieldLabel>
+        <Controller
+          control={control}
+          name="body"
+          render={({ field }) => (
+            <MarkdownEditor
+              key={editorKey}
+              onChange={field.onChange}
+              placeholder="Write a comment..."
+              uploadKey={`issues-${issueId}`}
+              value={field.value ?? ""}
+            />
           )}
-        </Field>
-      </FieldGroup>
+        />
+        {errors.body && (
+          <span className="text-destructive text-sm">
+            {errors.body.message}
+          </span>
+        )}
+      </Field>
       <Button disabled={isSubmitting} size="sm" type="submit">
         Add comment
       </Button>

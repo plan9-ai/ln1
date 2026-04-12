@@ -4,6 +4,7 @@ import { ProjectsService } from "@/modules/projects/service";
 export interface ProjectStatusView {
   id: number;
   name: string;
+  slug: string;
   priority: number;
   isDefault: boolean;
 }
@@ -19,7 +20,7 @@ export const ProjectStatusesService = {
     }
 
     const statuses = await sql`
-      SELECT id, name, priority, is_default as "isDefault"
+      SELECT id, name, slug, priority, is_default as "isDefault"
       FROM project_issue_statuses
       WHERE project_id = ${projectId}
       ORDER BY priority ASC

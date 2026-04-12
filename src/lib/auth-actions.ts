@@ -20,7 +20,7 @@ export async function signIn(
 }
 
 export async function signUp(email: string, password: string, name?: string) {
-  console.log("[signUp] Registered email:", email);
+
 
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.createUser({
@@ -47,7 +47,11 @@ export async function signUp(email: string, password: string, name?: string) {
   redirect("/app");
 }
 
-export async function signOut(callbackUrl?: string) {
+export async function signOut(callbackUrlOrFormData?: string | FormData) {
+  const callbackUrl =
+    typeof callbackUrlOrFormData === "string"
+      ? callbackUrlOrFormData
+      : undefined;
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect(

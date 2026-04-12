@@ -56,6 +56,26 @@ export const ProjectsService = {
     return { id: project.id };
   },
 
+  async getAllProjectsForUser(
+    userId: string
+  ): Promise<
+    { id: number; title: string; repository: string | null; teamSlug: string }[]
+  > {
+    const rows = await sql`
+      SELECT p.id, p.title, p.repository, t.slug as "teamSlug"
+      FROM projects p
+      JOIN teams t ON p.team_id = t.id
+      JOIN team_members tm ON p.team_id = tm.team_id AND tm.user_id = ${userId}
+      ORDER BY t.slug ASC, p.title ASC
+    `;
+    return (Array.isArray(rows) ? rows : []) as {
+      id: number;
+      title: string;
+      repository: string | null;
+      teamSlug: string;
+    }[];
+  },
+
   async getProjectsByTeamSlug(
     userId: string,
     teamSlug: string
@@ -81,13 +101,47 @@ export const ProjectsService = {
   async getProjectById(
     userId: string,
     projectId: number
-  ): Promise<{ id: number; title: string; description: string } | null> {
+  ): Promise<{
+    id: number;
+    title: string;
+    description: string;
+    agents: string;
+    repository: string | null;
+  } | null> {
     const [project] = await sql`
-      SELECT p.id, p.title, p.description
+      SELECT p.id, p.title, p.description, p.agents, p.repository
       FROM projects p
       JOIN team_members tm ON p.team_id = tm.team_id AND tm.user_id = ${userId}
       WHERE p.id = ${projectId}
     `;
-    return project as { id: number; title: string; description: string } | null;
+    return project as {
+      id: number;
+      title: string;
+      description: string;
+      agents: string;
+      repository: string | null;
+    } | null;
+  },
+
+  async updateProject(
+    userId: string,
+    projectId: number,
+    data: { title?: string; description?: string; agents?: string; repository?: string }
+  ): Promise<void> {
+    const project = await this.getProjectById(userId, projectId);
+    if (!project) {
+      throw new Error("Project not found or access denied");
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    await sql`
+      UPDATE projects
+      SET title = ${data.title ?? project.title},
+          description = ${data.description ?? project.description},
+          agents = ${data.agents ?? project.agents},
+          repository = ${data.repository ?? project.repository ?? ""},
+          updated_at = ${now}
+      WHERE id = ${projectId}
+    `;
   },
 };

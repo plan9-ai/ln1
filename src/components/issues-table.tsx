@@ -1,33 +1,11 @@
 "use client";
 
 import {
-  closestCenter,
-  DndContext,
-  type DragEndEvent,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  type UniqueIdentifier,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import {
-  arrayMove,
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import {
-  IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
   IconDotsVertical,
-  IconGripVertical,
-  IconLayoutColumns,
   IconSearch,
 } from "@tabler/icons-react";
 import type { ColumnDef, ColumnFiltersState } from "@tanstack/react-table";
@@ -36,22 +14,17 @@ import {
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
-  getSortedRowModel,
-  type Row,
-  type SortingState,
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useState } from "react";
 import useSWR from "swr";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
@@ -73,17 +46,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatDate } from "@/lib/format-date";
 import type { IssueView } from "@/modules/issues/model";
 
 const EMPTY_ISSUES: IssueView[] = [];
 
-function formatDate(timestamp: number) {
-  return new Date(timestamp * 1000).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+function getStatusRowColor(slug: string): string {
+  switch (slug) {
+    case "done":
+      return "bg-green-50 dark:bg-green-950/20";
+    case "in-progress":
+      return "bg-blue-50 dark:bg-blue-950/20";
+    case "in-testing":
+      return "bg-amber-50 dark:bg-amber-950/30";
+    case "reopened":
+      return "bg-orange-50 dark:bg-orange-950/20";
+    default:
+      return "";
+  }
 }
+
+
 
 interface IssuesTableProps {
   fallbackData?: IssueView[];
@@ -102,76 +85,6 @@ async function fetchIssues(url: string): Promise<IssueView[]> {
   return res.json();
 }
 
-function DraggableRow({
-  row,
-  onRowClick,
-}: {
-  row: Row<IssueView>;
-  onRowClick: () => void;
-}) {
-  const {
-    attributes,
-    isDragging,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({
-    id: row.original.id,
-  });
-
-  return (
-    <TableRow
-      className="relative z-0 cursor-pointer hover:bg-muted/50 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80"
-      data-dragging={isDragging}
-      onClick={onRowClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onRowClick();
-        }
-      }}
-      ref={setNodeRef}
-      role="button"
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-      }}
-      tabIndex={0}
-    >
-      {row.getVisibleCells().map((cell) => (
-        <TableCell
-          className={
-            cell.column.id === "actions" ? "w-10 text-right" : undefined
-          }
-          key={cell.id}
-          onClick={
-            cell.column.id === "drag" || cell.column.id === "actions"
-              ? (e) => e.stopPropagation()
-              : undefined
-          }
-        >
-          {cell.column.id === "drag" ? (
-            <Button
-              {...attributes}
-              {...listeners}
-              className="size-7 text-muted-foreground hover:bg-transparent"
-              onClick={(e) => e.stopPropagation()}
-              size="icon"
-              variant="ghost"
-            >
-              <IconGripVertical className="size-3 text-muted-foreground" />
-              <span className="sr-only">Drag to reorder</span>
-            </Button>
-          ) : (
-            flexRender(cell.column.columnDef.cell, cell.getContext())
-          )}
-        </TableCell>
-      ))}
-    </TableRow>
-  );
-}
-
 export function IssuesTable({
   fallbackData,
   projectId,
@@ -179,41 +92,22 @@ export function IssuesTable({
 }: IssuesTableProps) {
   const router = useRouter();
   const url = `/api/projects/${projectId}/issues`;
-  const { data, isLoading, mutate } = useSWR<IssueView[]>(url, fetchIssues, {
+  const { data, isLoading } = useSWR<IssueView[]>(url, fetchIssues, {
     fallbackData,
     refreshInterval: 30_000,
   });
   const issues = data ?? EMPTY_ISSUES;
 
-  const [orderedIssues, setOrderedIssues] = useState<IssueView[]>(() => issues);
-  useEffect(() => {
-    setOrderedIssues(issues);
-  }, [issues]);
-
   const columns: ColumnDef<IssueView>[] = [
-    {
-      id: "drag",
-      header: () => null,
-      cell: () => null,
-      enableSorting: false,
-      enableHiding: false,
-    },
     {
       accessorKey: "title",
       header: "Title",
       cell: ({ row }) => (
-        <span className="font-medium">{row.original.title}</span>
+        <span className="block truncate font-medium">
+          {row.original.title}
+        </span>
       ),
       enableHiding: false,
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => (
-        <Badge className="text-muted-foreground" variant="outline">
-          {row.original.status}
-        </Badge>
-      ),
     },
     {
       accessorKey: "createdAt",
@@ -258,67 +152,22 @@ export function IssuesTable({
 
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 100,
   });
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const sortableId = useId();
-  const sensors = useSensors(
-    useSensor(MouseSensor, {}),
-    useSensor(TouchSensor, {}),
-    useSensor(KeyboardSensor, {})
-  );
-  const dataIds = useMemo<UniqueIdentifier[]>(
-    () => orderedIssues.map((issue) => issue.id),
-    [orderedIssues]
-  );
-
-  async function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    if (!active) {
-      return;
-    }
-    if (!over) {
-      return;
-    }
-    if (active.id === over.id) {
-      return;
-    }
-    const oldIndex = dataIds.indexOf(active.id);
-    const newIndex = dataIds.indexOf(over.id);
-    const newOrder = arrayMove(orderedIssues, oldIndex, newIndex);
-    setOrderedIssues(newOrder);
-    const issueIds = newOrder.map((i) => i.id);
-    try {
-      const res = await fetch(url, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ issueIds }),
-      });
-      if (!res.ok) {
-        throw new Error("Failed to update order");
-      }
-      await mutate(newOrder, false);
-    } catch {
-      setOrderedIssues(issues);
-    }
-  }
-
   const table = useReactTable({
-    data: orderedIssues,
+    data: issues,
     columns,
     state: {
-      sorting,
       columnVisibility,
       columnFilters,
       pagination,
       globalFilter,
     },
     getRowId: (row) => String(row.id),
-    onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
@@ -326,7 +175,6 @@ export function IssuesTable({
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
   });
 
   return (
@@ -343,113 +191,107 @@ export function IssuesTable({
             />
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="sm" variant="outline">
-                <IconLayoutColumns />
-                <span className="hidden lg:inline">Columns</span>
-                <IconChevronDown />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              {table
-                .getAllColumns()
-                .filter(
-                  (column) =>
-                    typeof column.accessorFn !== "undefined" &&
-                    column.getCanHide()
-                )
-                .map((column) => (
-                  <DropdownMenuCheckboxItem
-                    checked={column.getIsVisible()}
-                    className="capitalize"
-                    key={column.id}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
       </div>
 
       <div className="overflow-hidden rounded-lg border">
-        <DndContext
-          collisionDetection={closestCenter}
-          id={sortableId}
-          modifiers={[restrictToVerticalAxis]}
-          onDragEnd={handleDragEnd}
-          sensors={sensors}
-        >
-          <Table>
-            <TableHeader className="bg-muted">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead
-                      className={
-                        header.column.id === "actions" ? "w-10 text-right" : ""
+        <Table className="table-fixed">
+          <TableHeader className="bg-muted">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    className={(() => {
+                      if (header.column.id === "actions") {
+                        return "w-10 min-w-10 shrink-0 text-right";
                       }
-                      colSpan={header.colSpan}
-                      key={header.id}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody className="**:data-[slot=table-cell]:first:w-8">
-              {isLoading && issues.length === 0 && (
-                <TableRow>
-                  <TableCell
-                    className="h-24 text-center text-muted-foreground"
-                    colSpan={columns.length}
+                      if (header.column.id === "createdAt") {
+                        return "w-28 shrink-0 whitespace-nowrap";
+                      }
+                      return "min-w-0";
+                    })()}
+                    colSpan={header.colSpan}
+                    key={header.id}
                   >
-                    Loading issues...
-                  </TableCell>
-                </TableRow>
-              )}
-              {!isLoading && issues.length === 0 && (
-                <TableRow>
-                  <TableCell
-                    className="h-24 text-center"
-                    colSpan={columns.length}
-                  >
-                    No issues found.
-                  </TableCell>
-                </TableRow>
-              )}
-              {table.getRowModel().rows?.length > 0 && (
-                <SortableContext
-                  items={table.getRowModel().rows.map((row) => row.original.id)}
-                  strategy={verticalListSortingStrategy}
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {isLoading && issues.length === 0 && (
+              <TableRow>
+                <TableCell
+                  className="h-24 text-center text-muted-foreground"
+                  colSpan={columns.length}
                 >
-                  {table.getRowModel().rows.map((row) => (
-                    <DraggableRow
-                      key={row.id}
-                      onRowClick={() =>
-                        router.push(
-                          `/${slug}/projects/${projectId}/issues/${row.original.id}`
-                        )
+                  Loading issues...
+                </TableCell>
+              </TableRow>
+            )}
+            {!isLoading && issues.length === 0 && (
+              <TableRow>
+                <TableCell
+                  className="h-24 text-center"
+                  colSpan={columns.length}
+                >
+                  No issues found.
+                </TableCell>
+              </TableRow>
+            )}
+            {table.getRowModel().rows.map((row) => (
+              <TableRow
+                className={`cursor-pointer hover:bg-muted/50 ${getStatusRowColor(row.original.statusSlug)}`}
+                key={row.id}
+                onClick={() =>
+                  router.push(
+                    `/${slug}/projects/${projectId}/issues/${row.original.id}`
+                  )
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    router.push(
+                      `/${slug}/projects/${projectId}/issues/${row.original.id}`
+                    );
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell
+                    className={(() => {
+                      if (cell.column.id === "actions") {
+                        return "w-10 text-right";
                       }
-                      row={row}
-                    />
-                  ))}
-                </SortableContext>
-              )}
-            </TableBody>
-          </Table>
-        </DndContext>
+                      if (cell.column.id === "createdAt") {
+                        return "whitespace-nowrap";
+                      }
+                      if (cell.column.id === "title") {
+                        return "min-w-0";
+                      }
+                      return undefined;
+                    })()}
+                    key={cell.id}
+                    onClick={
+                      cell.column.id === "actions"
+                        ? (e) => e.stopPropagation()
+                        : undefined
+                    }
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
 
       <div className="flex items-center justify-between px-4">

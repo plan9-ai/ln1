@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CreateIssueForm } from "@/components/create-issue-form";
+import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -61,7 +63,7 @@ export default async function NewIssuePage({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href={`/${slug}/projects/new`}>
+                <BreadcrumbLink href={`/${slug}/projects`}>
                   Projects
                 </BreadcrumbLink>
               </BreadcrumbItem>
@@ -82,6 +84,11 @@ export default async function NewIssuePage({
 
       <div className="flex flex-1 flex-col items-center p-4 pt-0">
         <div className="w-full max-w-2xl">
+          <Button asChild size="sm" variant="ghost" className="mb-4">
+            <Link href={`/${slug}/projects/${id}/issues`}>
+              &larr; Back to project
+            </Link>
+          </Button>
           <div className="mb-8 text-center">
             <h1 className="font-semibold text-2xl">Create a new issue</h1>
             <p className="mt-2 text-muted-foreground text-sm">
@@ -90,6 +97,7 @@ export default async function NewIssuePage({
             </p>
           </div>
           <CreateIssueForm
+            currentUserId={session.user.id}
             projectId={id}
             projectStatuses={projectStatuses}
             slug={slug}

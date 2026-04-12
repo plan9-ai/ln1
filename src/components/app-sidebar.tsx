@@ -1,6 +1,6 @@
 "use client";
 
-import { Bot, LayoutDashboard, Settings2, SquareTerminal } from "lucide-react";
+import { Bot, FileJson2, LayoutDashboard, Settings2, SquareTerminal } from "lucide-react";
 import type * as React from "react";
 import { NavLinks } from "@/components/nav-links";
 import type { ProjectListItem } from "@/components/nav-main";
@@ -27,7 +27,7 @@ function getNavMain(
       url: "#",
       icon: Bot,
       items: [
-        { title: "Notifcations", url: "#" },
+        { title: "Notifications", url: `/${currentSlug}/notifications` },
         {
           title: "Issues",
           url: hasProjects
@@ -49,8 +49,9 @@ function getNavMain(
       icon: Settings2,
       items: [
         { title: "General", url: "#" },
-        { title: "Projects", url: "#" },
+        { title: "Projects", url: `/${currentSlug}/projects` },
         { title: "Members", url: `/${currentSlug}/members` },
+        { title: "API Tokens", url: `/${currentSlug}/api-tokens` },
         { title: "My Profile", url: "#" },
       ],
     },
@@ -77,6 +78,7 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const linksItems = [
     { title: "Dashboard", url: `/${currentSlug}`, icon: LayoutDashboard },
+    { title: "OpenAPI", url: "/api/my/openapi", icon: FileJson2 },
   ];
 
   return (

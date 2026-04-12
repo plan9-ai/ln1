@@ -19,11 +19,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatDate } from "@/lib/format-date";
 import type { TeamInviteWithMeta } from "@/modules/team-invites/service";
-
-function formatDate(timestamp: number): string {
-  return new Date(timestamp * 1000).toLocaleDateString();
-}
 
 interface InvitesTableProps {
   slug: string;

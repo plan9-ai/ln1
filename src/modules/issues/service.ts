@@ -1,7 +1,6 @@
 import { sql } from "bun";
-import { appConfig } from "@/app.config";
 import { getAuthUsersByIds } from "@/lib/get-auth-user-by-email";
-import { sendIssueAssigneeEmail } from "@/lib/resend";
+import { notifyIssueAssigned } from "@/modules/notifications/service";
 import { ProjectStatusesService } from "@/modules/project-statuses/service";
 import { ProjectsService } from "@/modules/projects/service";
 import type {
@@ -47,11 +46,13 @@ async function tryNotifyNewAssignee(params: {
     if (!to) {
       return;
     }
-    const issueUrl = `${appConfig.BASE_URL}/${params.teamSlug}/projects/${params.projectId}/issues/${params.issueId}`;
-    await sendIssueAssigneeEmail({
-      to,
+    await notifyIssueAssigned({
+      userId: params.newAssigneeUserId,
+      toEmail: to,
+      teamSlug: params.teamSlug,
+      projectId: params.projectId,
+      issueId: params.issueId,
       issueTitle: params.title,
-      issueUrl,
     });
   } catch {
     /* email must not fail issue save */
@@ -140,7 +141,7 @@ export const IssuesService = {
     const [issue] = await sql`
       SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status_id as "statusId",
         i.assignee_user_id as "assigneeUserId",
-        pis.name as status, i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt",
+        pis.name as status, pis.slug as "statusSlug", i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt",
         t.slug as "teamSlug"
       FROM issues i
       JOIN project_issue_statuses pis ON i.status_id = pis.id
@@ -159,7 +160,7 @@ export const IssuesService = {
     const issues = await sql`
       SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status_id as "statusId",
         i.assignee_user_id as "assigneeUserId",
-        pis.name as status, i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt",
+        pis.name as status, pis.slug as "statusSlug", i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt",
         t.slug as "teamSlug", p.title as "projectTitle"
       FROM issues i
       JOIN project_issue_statuses pis ON i.status_id = pis.id
@@ -176,7 +177,7 @@ export const IssuesService = {
     const issues = await sql`
       SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status_id as "statusId",
         i.assignee_user_id as "assigneeUserId",
-        pis.name as status, i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt",
+        pis.name as status, pis.slug as "statusSlug", i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt",
         t.slug as "teamSlug", p.title as "projectTitle"
       FROM issues i
       JOIN project_issue_statuses pis ON i.status_id = pis.id
@@ -195,7 +196,7 @@ export const IssuesService = {
     const issues = await sql`
       SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status_id as "statusId",
         i.assignee_user_id as "assigneeUserId",
-        pis.name as status, i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt"
+        pis.name as status, pis.slug as "statusSlug", i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt"
       FROM issues i
       JOIN project_issue_statuses pis ON i.status_id = pis.id
       JOIN projects p ON i.project_id = p.id
@@ -385,5 +386,58 @@ export const IssuesService = {
         `;
       }
     });
+  },
+
+  async updateIssueText(
+    userId: string,
+    issueId: number,
+    data: { title?: string; description?: string }
+  ): Promise<void> {
+    const issue = await this.getIssueById(userId, issueId);
+    if (!issue) {
+      throw new Error("Issue not found or access denied");
+    }
+
+    const title = (data.title?.trim() ?? issue.title).trim();
+    if (!title) {
+      throw new Error("Title is required");
+    }
+
+    const description = data.description?.trim() ?? issue.description ?? "";
+    const now = Math.floor(Date.now() / 1000);
+
+    await sql`
+      UPDATE issues
+      SET title = ${title}, description = ${description}, updated_at = ${now}
+      WHERE id = ${issueId}
+    `;
+  },
+
+  async updateIssueStatusByName(
+    userId: string,
+    issueId: number,
+    statusName: string
+  ): Promise<void> {
+    const issue = await this.getIssueById(userId, issueId);
+    if (!issue) {
+      throw new Error("Issue not found or access denied");
+    }
+    const statuses = await ProjectStatusesService.getStatusesByProjectId(
+      userId,
+      issue.projectId
+    );
+    const normalized = statusName.toLowerCase();
+    const target = statuses.find(
+      (s) => s.slug === normalized || s.name.toLowerCase() === normalized
+    );
+    if (!target) {
+      throw new Error(`Status "${statusName}" not found in project`);
+    }
+    const now = Math.floor(Date.now() / 1000);
+    await sql`
+      UPDATE issues
+      SET status_id = ${target.id}, updated_at = ${now}
+      WHERE id = ${issueId}
+    `;
   },
 };

@@ -4,15 +4,31 @@ import { authEnsureSession } from "@/lib/ensure-user-in-app-db";
 import { CommentsService } from "@/modules/comments/service";
 import { IssuesService } from "@/modules/issues/service";
 import { ProjectStatusesService } from "@/modules/project-statuses/service";
+import { ProjectsService } from "@/modules/projects/service";
 import {
   issueCommentsParamsSchema,
   issueIdParamsSchema,
   moveIssueBodySchema,
   projectIdParamsSchema,
   reorderIssuesBodySchema,
+  updateProjectFormSchema,
 } from "./model";
 
 export const projectsRoutes = new Elysia({ prefix: "/projects" })
+  .patch(
+    "/:id",
+    async ({ params: { id }, body, request }) => {
+      const session = await authEnsureSession(() =>
+        getSessionForRequest(request)
+      );
+      await ProjectsService.updateProject(session.user.id, id, body);
+      return { ok: true };
+    },
+    {
+      params: projectIdParamsSchema,
+      body: updateProjectFormSchema,
+    }
+  )
   .get(
     "/:id/statuses",
     async ({ params: { id }, request }) => {
@@ -82,6 +98,25 @@ export const projectsRoutes = new Elysia({ prefix: "/projects" })
     },
     {
       params: projectIdParamsSchema,
+    }
+  )
+  .get(
+    "/:id/issues/:issueId",
+    async ({ params: { issueId }, request }) => {
+      const session = await authEnsureSession(() =>
+        getSessionForRequest(request)
+      );
+      const issue = await IssuesService.getIssueById(
+        session.user.id,
+        issueId
+      );
+      if (!issue) {
+        throw new Error("Issue not found");
+      }
+      return issue;
+    },
+    {
+      params: issueIdParamsSchema,
     }
   )
   .get(

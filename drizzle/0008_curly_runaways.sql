@@ -1,0 +1,1 @@
+ALTER TABLE "project_issue_statuses" ADD COLUMN "slug" text DEFAULT '' NOT NULL;

@@ -15,6 +15,8 @@ export const projectsTable = table("projects", {
     .references(() => teamsTable.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description").notNull().default(""),
+  agents: text("agents").notNull().default(""),
+  repository: text("repository").default(""),
   createdAt: integer("created_at").notNull(),
   updatedAt: integer("updated_at").notNull(),
 });

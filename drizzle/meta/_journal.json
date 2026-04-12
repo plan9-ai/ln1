@@ -36,6 +36,41 @@
       "when": 1774107995593,
       "tag": "0004_illegal_ogun",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1775861978236,
+      "tag": "0005_calm_power_pack",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1775892166931,
+      "tag": "0006_dazzling_timeslip",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1775965397979,
+      "tag": "0007_spotty_morbius",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1775965753959,
+      "tag": "0008_curly_runaways",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1775990628581,
+      "tag": "0009_cool_shiver_man",
+      "breakpoints": true
     }
   ]
 }

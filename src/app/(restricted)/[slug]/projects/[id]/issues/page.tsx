@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { IssuesTablesByStatus } from "@/components/issues-tables-by-status";
+import { IssuesTable } from "@/components/issues-table";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,7 +14,6 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getAuthSession } from "@/lib/auth";
 import { IssuesService } from "@/modules/issues/service";
-import { ProjectStatusesService } from "@/modules/project-statuses/service";
 import { ProjectsService } from "@/modules/projects/service";
 
 export default async function IssuesListPage({
@@ -41,10 +40,10 @@ export default async function IssuesListPage({
     notFound();
   }
 
-  const [initialIssues, initialStatuses] = await Promise.all([
-    IssuesService.getIssuesByProjectId(session.user.id, projectId),
-    ProjectStatusesService.getStatusesByProjectId(session.user.id, projectId),
-  ]);
+  const initialIssues = await IssuesService.getIssuesByProjectId(
+    session.user.id,
+    projectId
+  );
 
   return (
     <>
@@ -58,17 +57,17 @@ export default async function IssuesListPage({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href={`/${slug}/projects/new`}>
+                <BreadcrumbLink href={`/${slug}/projects`}>
                   Projects
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbItem>
                 <BreadcrumbLink href={`/${slug}/projects/${id}/issues`}>
                   {project.title}
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage>Issues</BreadcrumbPage>
               </BreadcrumbItem>
@@ -94,11 +93,10 @@ export default async function IssuesListPage({
               </Button>
             </div>
           </div>
-          <IssuesTablesByStatus
+          <IssuesTable
             fallbackData={initialIssues}
             projectId={id}
             slug={slug}
-            statuses={initialStatuses}
           />
         </div>
       </div>

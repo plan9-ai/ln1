@@ -1,7 +1,9 @@
 "use client";
 
-import useSWR, { useSWRConfig } from "swr";
+import useSWR from "swr";
 import { InsertCommentForm } from "@/components/insert-comment-form";
+import { MarkdownContent } from "@/components/markdown-content";
+import { formatDateTime } from "@/lib/format-date";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { IssueCommentsSelect } from "@/db/schema/issue-comments";
 
@@ -34,31 +36,24 @@ export function CommentsList({
   currentUserId,
   initialComments,
 }: CommentsListProps) {
-  const { mutate } = useSWRConfig();
-  const swrKey = COMMENTS_SWR_KEY(projectId, issueId);
-  const { data, isLoading } = useSWR<IssueCommentsSelect[]>(
-    swrKey,
+  const { data, isLoading, mutate } = useSWR<IssueCommentsSelect[]>(
+    COMMENTS_SWR_KEY(projectId, issueId),
     fetchComments,
     {
       fallbackData: initialComments,
-      revalidateOnFocus: false,
-      refreshInterval: 30_000,
+      refreshInterval: 5_000,
     }
   );
   const comments = data ?? [];
 
-  const handleCommentInserted = () => {
-    mutate(swrKey);
-  };
-
   return (
-    <Card className="max-w-2xl">
+    <Card>
       <CardHeader>
         <CardTitle>Comments</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {isLoading && (
-          <div className="mb-1 text-muted-foreground text-sm">
+          <div className="text-muted-foreground text-sm">
             Loading comments...
           </div>
         )}
@@ -70,14 +65,14 @@ export function CommentsList({
             >
               <div className="mb-1 text-muted-foreground text-sm">
                 {comment.userId === currentUserId ? "You" : "User"} ·{" "}
-                {new Date(comment.createdAt * 1000).toLocaleString()}
+                {formatDateTime(comment.createdAt)}
               </div>
-              <p className="whitespace-pre-wrap text-sm">{comment.body}</p>
+              <MarkdownContent content={comment.body} />
             </div>
           ))}
         <InsertCommentForm
           issueId={issueId}
-          onSuccess={handleCommentInserted}
+          onSuccess={() => mutate()}
           projectId={projectId}
           slug={slug}
         />

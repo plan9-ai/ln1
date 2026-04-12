@@ -42,7 +42,7 @@ export default async function IssuesPage({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href={`/${slug}/projects/new`}>
+                <BreadcrumbLink href={`/${slug}/projects`}>
                   Projects
                 </BreadcrumbLink>
               </BreadcrumbItem>

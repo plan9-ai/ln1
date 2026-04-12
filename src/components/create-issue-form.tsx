@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { MarkdownEditor } from "@/components/markdown-editor";
 import {
   createIssueFormSchema,
   type InferCreateIssueFormSchema,
@@ -37,6 +37,7 @@ interface CreateIssueFormProps {
   projectStatuses: ProjectStatusView[];
   slug: string;
   teamMembers: TeamMemberWithEmail[];
+  currentUserId: string;
 }
 
 async function fetchStatuses(url: string): Promise<ProjectStatusView[]> {
@@ -52,6 +53,7 @@ export function CreateIssueForm({
   projectStatuses,
   slug,
   teamMembers,
+  currentUserId,
 }: CreateIssueFormProps) {
   const { data: statuses } = useSWR(
     `/api/projects/${projectId}/statuses`,
@@ -59,7 +61,9 @@ export function CreateIssueForm({
     { fallbackData: projectStatuses }
   );
 
-  const defaultStatusId = statuses?.[0]?.id;
+  const defaultStatusId =
+    statuses?.find((s) => s.slug === "todo")?.id ??
+    statuses?.[0]?.id;
 
   const {
     register,
@@ -72,7 +76,7 @@ export function CreateIssueForm({
       title: "",
       description: "",
       statusId: defaultStatusId ?? 0,
-      assigneeUserId: null,
+      assigneeUserId: currentUserId,
     },
   });
 
@@ -118,12 +122,16 @@ export function CreateIssueForm({
             </Field>
             <Field data-invalid={!!errors.description}>
               <FieldLabel htmlFor="description">Description</FieldLabel>
-              <Textarea
-                aria-invalid={!!errors.description}
-                id="description"
-                placeholder="Brief description of the issue..."
-                rows={3}
-                {...register("description")}
+              <Controller
+                control={control}
+                name="description"
+                render={({ field }) => (
+                  <MarkdownEditor
+                    onChange={field.onChange}
+                    placeholder="Brief description of the issue..."
+                    value={field.value ?? ""}
+                  />
+                )}
               />
               {errors.description && (
                 <span className="text-destructive text-sm">

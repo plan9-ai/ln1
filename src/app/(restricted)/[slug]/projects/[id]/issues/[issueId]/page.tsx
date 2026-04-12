@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CommentsList } from "@/components/comments-list";
-import { Badge } from "@/components/ui/badge";
+import { IssueAttachments } from "@/components/issue-attachments";
+import { IssueDetail } from "@/components/issue-detail";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,7 +12,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getAuthSession } from "@/lib/auth";
@@ -65,7 +65,7 @@ export default async function ViewIssuePage({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href={`/${slug}/projects/new`}>
+                <BreadcrumbLink href={`/${slug}/projects`}>
                   Projects
                 </BreadcrumbLink>
               </BreadcrumbItem>
@@ -84,45 +84,37 @@ export default async function ViewIssuePage({
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div className="flex max-w-2xl items-center justify-between">
-          <Button asChild size="sm" variant="ghost">
-            <Link href={`/${slug}/projects/${id}/issues`}>
-              &larr; Back to project
-            </Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link href={`/${slug}/projects/${id}/issues/edit/${issueId}`}>
-              Edit
-            </Link>
-          </Button>
+      <div className="flex flex-1 flex-col items-center p-4 pt-0">
+        <div className="flex w-full max-w-2xl flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <Button asChild size="sm" variant="ghost">
+              <Link href={`/${slug}/projects/${id}/issues`}>
+                &larr; Back to project
+              </Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link href={`/${slug}/projects/${id}/issues/edit/${issueId}`}>
+                Edit
+              </Link>
+            </Button>
+          </div>
+
+          <IssueDetail
+            initialIssue={issue}
+            issueId={issueId}
+            projectId={id}
+          />
+
+          <IssueAttachments issueId={issueId} />
+
+          <CommentsList
+            currentUserId={session.user.id}
+            initialComments={comments}
+            issueId={issueId}
+            projectId={id}
+            slug={slug}
+          />
         </div>
-
-        <Card className="max-w-2xl">
-          <CardHeader>
-            <div className="flex items-center justify-between gap-4">
-              <CardTitle className="text-2xl">{issue.title}</CardTitle>
-              <Badge variant="secondary">{issue.status}</Badge>
-            </div>
-            <div className="text-muted-foreground text-sm">
-              Created: {new Date(issue.createdAt * 1000).toLocaleString()} |
-              Updated: {new Date(issue.updatedAt * 1000).toLocaleString()}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="whitespace-pre-wrap">
-              {issue.description || "No description."}
-            </p>
-          </CardContent>
-        </Card>
-
-        <CommentsList
-          currentUserId={session.user.id}
-          initialComments={comments}
-          issueId={issueId}
-          projectId={id}
-          slug={slug}
-        />
       </div>
     </>
   );

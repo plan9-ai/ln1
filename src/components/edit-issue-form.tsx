@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { MarkdownEditor } from "@/components/markdown-editor";
 import {
   type InferUpdateIssueFormSchema,
   type IssueView,
@@ -237,12 +237,17 @@ export function EditIssueForm({
             </Field>
             <Field data-invalid={!!errors.description}>
               <FieldLabel htmlFor="description">Description</FieldLabel>
-              <Textarea
-                aria-invalid={!!errors.description}
-                id="description"
-                placeholder="Brief description of the issue..."
-                rows={3}
-                {...register("description")}
+              <Controller
+                control={control}
+                name="description"
+                render={({ field }) => (
+                  <MarkdownEditor
+                    onChange={field.onChange}
+                    placeholder="Brief description of the issue..."
+                    uploadKey={attachmentsKey}
+                    value={field.value ?? ""}
+                  />
+                )}
               />
               {errors.description && (
                 <span className="text-destructive text-sm">

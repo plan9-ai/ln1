@@ -1,6 +1,7 @@
 import {
   index,
   integer,
+  jsonb,
   serial,
   pgTable as table,
   text,
@@ -19,6 +20,7 @@ export const notificationsTable = table(
       .references(() => usersTable.id, { onDelete: "cascade" }),
     entityKey: text("entity_key").notNull(),
     kind: text("kind").notNull(),
+    payload: jsonb("payload").default({}),
     createdAt: integer("created_at").notNull(),
     readAt: integer("read_at"),
   },

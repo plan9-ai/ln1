@@ -9,15 +9,8 @@ import useSWRMutation from "swr/mutation";
 
 import { Badge } from "@/components/ui/badge";
 import type { IssueView } from "@/modules/issues/model";
+import { formatDate } from "@/lib/format-date";
 import type { ProjectStatusView } from "@/modules/project-statuses/service";
-
-function formatDate(timestamp: number) {
-  return new Date(timestamp * 1000).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
 
 const EMPTY_ISSUES: IssueView[] = [];
 const EMPTY_STATUSES: ProjectStatusView[] = [];

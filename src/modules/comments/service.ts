@@ -4,6 +4,7 @@ import type {
   IssueCommentsSelect,
 } from "@/db/schema/issue-comments";
 import { IssuesService } from "@/modules/issues/service";
+import { notifyIssueCommented } from "@/modules/notifications/service";
 
 export const CommentsService = {
   async insertComment(
@@ -32,6 +33,16 @@ export const CommentsService = {
     await sql`
       INSERT INTO issue_comments ${sql(commentData)}
     `;
+
+    if (issue.assigneeUserId && issue.teamSlug) {
+      await notifyIssueCommented({
+        userId: issue.assigneeUserId,
+        teamSlug: issue.teamSlug,
+        projectId: issue.projectId,
+        issueId,
+        issueTitle: issue.title,
+      });
+    }
   },
 
   async getCommentsByIssueId(
