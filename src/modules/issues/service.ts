@@ -5,6 +5,8 @@ import { ProjectStatusesService } from "@/modules/project-statuses/service";
 import { ProjectsService } from "@/modules/projects/service";
 import type {
   CreateIssueBody,
+  IssueFullView,
+  IssueListItem,
   IssueView,
   IssueWithContext,
   UpdateIssueBody,
@@ -171,6 +173,66 @@ export const IssuesService = {
       ORDER BY i.updated_at DESC
     `;
     return (issues ?? []) as IssueWithContext[];
+  },
+
+  async getAllIssuesLightForUser(userId: string): Promise<IssueListItem[]> {
+    const issues = await sql`
+      SELECT i.id, i.title,
+        pis.name as status, pis.slug as "statusSlug",
+        i.project_id as "projectId", p.title as "projectTitle",
+        t.slug as "teamSlug",
+        i.assignee_user_id as "assigneeUserId",
+        i.updated_at as "updatedAt"
+      FROM issues i
+      JOIN project_issue_statuses pis ON i.status_id = pis.id
+      JOIN projects p ON i.project_id = p.id
+      JOIN teams t ON p.team_id = t.id
+      JOIN team_members tm ON p.team_id = tm.team_id AND tm.user_id = ${userId}
+      WHERE i.assignee_user_id = ${userId}
+      ORDER BY i.updated_at DESC
+    `;
+    return (issues ?? []) as IssueListItem[];
+  },
+
+  async getIssueFullForUser(
+    userId: string,
+    issueId: number
+  ): Promise<IssueFullView | null> {
+    const [issue] = await sql`
+      SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status_id as "statusId",
+        i.assignee_user_id as "assigneeUserId",
+        pis.name as status, pis.slug as "statusSlug", i.priority,
+        i.created_at as "createdAt", i.updated_at as "updatedAt",
+        t.slug as "teamSlug", p.title as "projectTitle"
+      FROM issues i
+      JOIN project_issue_statuses pis ON i.status_id = pis.id
+      JOIN projects p ON i.project_id = p.id
+      JOIN teams t ON p.team_id = t.id
+      JOIN team_members tm ON p.team_id = tm.team_id AND tm.user_id = ${userId}
+      WHERE i.id = ${issueId}
+    `;
+    if (!issue) {
+      return null;
+    }
+
+    const [project] = await sql`
+      SELECT p.id, p.title, p.description, p.agents, p.repository
+      FROM projects p
+      WHERE p.id = ${issue.projectId}
+    `;
+
+    const comments = await sql`
+      SELECT id, user_id as "userId", body, created_at as "createdAt"
+      FROM issue_comments
+      WHERE issue_id = ${issueId}
+      ORDER BY created_at ASC
+    `;
+
+    return {
+      ...(issue as IssueWithContext),
+      project: project as IssueFullView["project"],
+      comments: (comments ?? []) as IssueFullView["comments"],
+    };
   },
 
   async getAllIssuesForUser(userId: string): Promise<IssueWithContext[]> {

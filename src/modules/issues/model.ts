@@ -34,6 +34,36 @@ export interface IssueWithContext extends IssueView {
   projectTitle: string;
 }
 
+export interface IssueListItem {
+  id: number;
+  title: string;
+  status: string;
+  statusSlug: string;
+  projectId: number;
+  projectTitle: string;
+  teamSlug: string;
+  assigneeUserId: string | null;
+  updatedAt: number;
+}
+
+export interface IssueCommentView {
+  id: number;
+  userId: string;
+  body: string;
+  createdAt: number;
+}
+
+export interface IssueFullView extends IssueWithContext {
+  project: {
+    id: number;
+    title: string;
+    description: string;
+    agents: string;
+    repository: string | null;
+  };
+  comments: IssueCommentView[];
+}
+
 export const createIssueFormSchema = Type.Object({
   title: Type.String({ minLength: 1 }),
   description: Type.Optional(Type.String()),

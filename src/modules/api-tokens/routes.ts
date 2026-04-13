@@ -32,13 +32,32 @@ export const myApiRoutes = new Elysia({ prefix: "/my" })
   .get(
     "/:token/issues",
     async ({ userId }) => {
-      return IssuesService.getAllIssuesForUser(userId);
+      return IssuesService.getAllIssuesLightForUser(userId);
     },
     {
       params: t.Object({ token: t.String() }),
       detail: {
-        summary: "Get my issues",
-        description: "Returns all issues assigned to the token owner",
+        summary: "Get my issues (light)",
+        description:
+          "Returns a lightweight list of issues assigned to the token owner — id, title, status, project. Use GET /issues/:issueId for full details.",
+      },
+    }
+  )
+  .get(
+    "/:token/issues/:issueId",
+    async ({ userId, params: { issueId } }) => {
+      const issue = await IssuesService.getIssueFullForUser(userId, issueId);
+      if (!issue) {
+        throw new Error("Issue not found or access denied");
+      }
+      return issue;
+    },
+    {
+      params: t.Object({ token: t.String(), issueId: t.Number() }),
+      detail: {
+        summary: "Get issue (full)",
+        description:
+          "Returns full issue info in a single request: issue fields, parent project (title, description, agents, repository), and all comments.",
       },
     }
   )
