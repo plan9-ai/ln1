@@ -18,7 +18,8 @@ import type { TeamWithRole } from "@/modules/teams/model";
 
 function getNavMain(
   currentSlug: string,
-  projects: { id: number; title: string }[]
+  projects: { id: number; title: string }[],
+  myIssuesCount: number
 ) {
   const hasProjects = projects && projects.length > 0;
   return [
@@ -33,6 +34,7 @@ function getNavMain(
           url: hasProjects
             ? `/${currentSlug}/all-my-issues`
             : `/${currentSlug}/projects/new`,
+          count: myIssuesCount,
         },
       ],
     },
@@ -62,6 +64,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   teams: TeamWithRole[];
   currentSlug: string;
   projects: ProjectListItem[];
+  myIssuesCount: number;
   user: {
     name: string;
     email: string;
@@ -73,6 +76,7 @@ export function AppSidebar({
   teams,
   currentSlug,
   projects,
+  myIssuesCount,
   user,
   ...props
 }: AppSidebarProps) {
@@ -89,7 +93,7 @@ export function AppSidebar({
       <SidebarContent>
         <NavMain
           currentSlug={currentSlug}
-          items={getNavMain(currentSlug, projects)}
+          items={getNavMain(currentSlug, projects, myIssuesCount)}
           projects={projects}
         />
         <NavLinks items={linksItems} />

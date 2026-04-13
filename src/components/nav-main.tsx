@@ -41,7 +41,10 @@ export interface ProjectListItem {
 }
 
 function renderProjectsSubItems(
-  item: { title: string; items?: { title: string; url: string }[] },
+  item: {
+    title: string;
+    items?: { title: string; url: string; count?: number }[];
+  },
   projects: ProjectListItem[] | undefined,
   currentSlug: string | undefined
 ) {
@@ -51,6 +54,11 @@ function renderProjectsSubItems(
         <SidebarMenuSubButton asChild>
           <Link href={subItem.url}>
             <span>{subItem.title}</span>
+            {typeof subItem.count === "number" && subItem.count > 0 && (
+              <span className="ml-auto rounded bg-muted px-1.5 py-0.5 text-muted-foreground text-xs tabular-nums">
+                {subItem.count}
+              </span>
+            )}
           </Link>
         </SidebarMenuSubButton>
       </SidebarMenuSubItem>
@@ -111,6 +119,7 @@ export function NavMain({
     items?: {
       title: string;
       url: string;
+      count?: number;
     }[];
   }[];
   currentSlug?: string;

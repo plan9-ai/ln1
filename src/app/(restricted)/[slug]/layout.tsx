@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { getAuthSession } from "@/lib/auth";
+import { IssuesService } from "@/modules/issues/service";
 import { ProjectsService } from "@/modules/projects/service";
 import { TeamsService } from "@/modules/teams/service";
 
@@ -33,6 +34,10 @@ export default async function TeamSlugLayout({
     slug
   );
 
+  const myIssuesCount = await IssuesService.getActiveIssueCountForUser(
+    session.user.id
+  );
+
   const user = {
     name: session.user.name ?? "User",
     email: session.user.email ?? "",
@@ -42,6 +47,7 @@ export default async function TeamSlugLayout({
   return (
     <DashboardShell
       currentSlug={slug}
+      myIssuesCount={myIssuesCount}
       projects={projects}
       teams={teams}
       user={user}

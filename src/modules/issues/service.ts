@@ -175,6 +175,17 @@ export const IssuesService = {
     return (issues ?? []) as IssueWithContext[];
   },
 
+  async getActiveIssueCountForUser(userId: string): Promise<number> {
+    const [row] = await sql`
+      SELECT COUNT(*)::int AS count
+      FROM issues i
+      JOIN project_issue_statuses pis ON i.status_id = pis.id
+      WHERE i.assignee_user_id = ${userId}
+        AND pis.slug IN ('todo', 'in-testing')
+    `;
+    return (row?.count as number) ?? 0;
+  },
+
   async getAllIssuesLightForUser(userId: string): Promise<IssueListItem[]> {
     const issues = await sql`
       SELECT i.id, i.title,
