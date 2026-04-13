@@ -3,6 +3,7 @@ export function formatDate(timestamp: number): string {
     year: "numeric",
     month: "short",
     day: "numeric",
+    timeZone: "UTC",
   });
 }
 
@@ -13,5 +14,6 @@ export function formatDateTime(timestamp: number): string {
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "UTC",
   });
 }
