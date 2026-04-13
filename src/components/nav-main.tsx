@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
+import type { ReactNode } from "react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -44,7 +44,7 @@ export interface ProjectListItem {
 function renderProjectsSubItems(
   item: {
     title: string;
-    items?: { title: string; url: string; count?: number }[];
+    items?: { title: string; url: string; badge?: ReactNode }[];
   },
   projects: ProjectListItem[] | undefined,
   currentSlug: string | undefined
@@ -55,14 +55,7 @@ function renderProjectsSubItems(
         <SidebarMenuSubButton asChild>
           <Link href={subItem.url}>
             <span>{subItem.title}</span>
-            {typeof subItem.count === "number" && subItem.count > 0 && (
-              <Badge
-                className="ml-auto tabular-nums"
-                variant="destructive"
-              >
-                {subItem.count}
-              </Badge>
-            )}
+            {subItem.badge}
           </Link>
         </SidebarMenuSubButton>
       </SidebarMenuSubItem>
@@ -123,7 +116,7 @@ export function NavMain({
     items?: {
       title: string;
       url: string;
-      count?: number;
+      badge?: ReactNode;
     }[];
   }[];
   currentSlug?: string;

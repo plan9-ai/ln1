@@ -2,6 +2,7 @@
 
 import { Bot, FileJson2, LayoutDashboard, Settings2, SquareTerminal } from "lucide-react";
 import type * as React from "react";
+import { MyIssuesCountBadge } from "@/components/my-issues-count-badge";
 import { NavLinks } from "@/components/nav-links";
 import type { ProjectListItem } from "@/components/nav-main";
 import { NavMain } from "@/components/nav-main";
@@ -34,7 +35,7 @@ function getNavMain(
           url: hasProjects
             ? `/${currentSlug}/all-my-issues`
             : `/${currentSlug}/projects/new`,
-          count: myIssuesCount,
+          badge: <MyIssuesCountBadge initialCount={myIssuesCount} />,
         },
       ],
     },
