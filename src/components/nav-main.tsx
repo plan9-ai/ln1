@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+import { Badge } from "@/components/ui/badge";
 import {
   Collapsible,
   CollapsibleContent,
@@ -55,9 +56,12 @@ function renderProjectsSubItems(
           <Link href={subItem.url}>
             <span>{subItem.title}</span>
             {typeof subItem.count === "number" && subItem.count > 0 && (
-              <span className="ml-auto rounded bg-muted px-1.5 py-0.5 text-muted-foreground text-xs tabular-nums">
+              <Badge
+                className="ml-auto tabular-nums"
+                variant="destructive"
+              >
                 {subItem.count}
-              </span>
+              </Badge>
             )}
           </Link>
         </SidebarMenuSubButton>
