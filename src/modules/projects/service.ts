@@ -38,18 +38,26 @@ export const ProjectsService = {
       throw new Error("Failed to create project");
     }
 
+    // Slug is the stable identifier used by UI code (row coloring, default
+    // picker). Name is user-visible and may be renamed later — consumers must
+    // match on id or slug, never on name.
     const defaultStatuses = [
-      { name: "backlog", priority: 0, is_default: true },
-      { name: "todo", priority: 1, is_default: false },
-      { name: "in progress", priority: 2, is_default: false },
-      { name: "in testing", priority: 3, is_default: false },
-      { name: "reopened", priority: 4, is_default: false },
-      { name: "done", priority: 5, is_default: false },
+      { name: "backlog", slug: "backlog", priority: 0, is_default: true },
+      { name: "todo", slug: "todo", priority: 1, is_default: false },
+      { name: "in progress", slug: "in-progress", priority: 2, is_default: false },
+      { name: "in testing", slug: "in-testing", priority: 3, is_default: false },
+      {
+        name: "ready for release",
+        slug: "ready-for-release",
+        priority: 4,
+        is_default: false,
+      },
+      { name: "done", slug: "done", priority: 5, is_default: false },
     ];
     for (const s of defaultStatuses) {
       await sql`
-        INSERT INTO project_issue_statuses (project_id, name, priority, is_default)
-        VALUES (${project.id}, ${s.name}, ${s.priority}, ${s.is_default})
+        INSERT INTO project_issue_statuses (project_id, name, slug, priority, is_default)
+        VALUES (${project.id}, ${s.name}, ${s.slug}, ${s.priority}, ${s.is_default})
       `;
     }
 

@@ -22,7 +22,7 @@ function getStatusRowColor(slug: string): string {
       return "bg-blue-50 dark:bg-blue-950/20";
     case "in-testing":
       return "bg-amber-50 dark:bg-amber-950/30";
-    case "reopened":
+    case "ready-for-release":
       return "bg-orange-50 dark:bg-orange-950/20";
     default:
       return "";
