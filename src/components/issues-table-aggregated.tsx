@@ -41,6 +41,7 @@ export function IssuesTableAggregated({ issues }: IssuesTableAggregatedProps) {
       <Table className="table-fixed">
         <TableHeader className="bg-muted">
           <TableRow>
+            <TableHead className="w-16 shrink-0">ID</TableHead>
             <TableHead className="min-w-0">Title</TableHead>
             <TableHead className="w-32 shrink-0">Project</TableHead>
             <TableHead className="w-28 shrink-0 whitespace-nowrap">
@@ -53,7 +54,7 @@ export function IssuesTableAggregated({ issues }: IssuesTableAggregatedProps) {
             <TableRow>
               <TableCell
                 className="h-24 text-center text-muted-foreground"
-                colSpan={3}
+                colSpan={4}
               >
                 No issues found.
               </TableCell>
@@ -75,6 +76,9 @@ export function IssuesTableAggregated({ issues }: IssuesTableAggregatedProps) {
                   role="button"
                   tabIndex={0}
                 >
+                  <TableCell className="text-muted-foreground text-sm tabular-nums">
+                    {issue.id}
+                  </TableCell>
                   <TableCell className="min-w-0">
                     <span className="block truncate font-medium">
                       {issue.title}
