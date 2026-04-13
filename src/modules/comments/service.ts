@@ -45,6 +45,36 @@ export const CommentsService = {
     }
   },
 
+  async updateComment(
+    userId: string,
+    commentId: number,
+    body: string
+  ): Promise<void> {
+    const trimmed = body.trim();
+    if (!trimmed) {
+      throw new Error("Body is required");
+    }
+
+    // Only the comment author may edit their own comment.
+    const [row] = await sql`
+      SELECT ic.id
+      FROM issue_comments ic
+      JOIN issues i ON ic.issue_id = i.id
+      JOIN projects p ON i.project_id = p.id
+      JOIN team_members tm ON p.team_id = tm.team_id AND tm.user_id = ${userId}
+      WHERE ic.id = ${commentId} AND ic.user_id = ${userId}
+    `;
+    if (!row) {
+      throw new Error("Comment not found or access denied");
+    }
+
+    await sql`
+      UPDATE issue_comments
+      SET body = ${trimmed}
+      WHERE id = ${commentId}
+    `;
+  },
+
   async getCommentsByIssueId(
     userId: string,
     issueId: number

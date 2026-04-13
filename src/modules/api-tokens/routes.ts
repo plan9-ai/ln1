@@ -114,6 +114,26 @@ export const myApiRoutes = new Elysia({ prefix: "/my" })
       },
     }
   )
+  .patch(
+    "/:token/issues/:issueId/comments/:commentId",
+    async ({ userId, params: { commentId }, body }) => {
+      await CommentsService.updateComment(userId, commentId, body.body);
+      return { ok: true };
+    },
+    {
+      params: t.Object({
+        token: t.String(),
+        issueId: t.Number(),
+        commentId: t.Number(),
+      }),
+      body: t.Object({ body: t.String() }),
+      detail: {
+        summary: "Update comment body",
+        description:
+          "Rewrites the body of an existing comment. Only the original author may edit.",
+      },
+    }
+  )
   .get(
     "/:token/issues/:issueId/comments",
     async ({ userId, params: { issueId } }) => {
