@@ -6,7 +6,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-14 items-center justify-between px-8">
         <Link className="font-semibold text-lg" href="/">
-          LN1
+          LN2
         </Link>
         <nav className="flex items-center gap-2">
           <Button asChild variant="ghost">
